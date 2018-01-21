@@ -1,6 +1,14 @@
+{% extends 'clinicaltrials/base.html' %}
+{% block body %}
+
+
 <h1> {{trial}} </h1>
+<h1> Creation date: {{trial.creationDate}}</h1>
+
 {% for file in allFiles %}
 	<ul> 
-		<h1> {{file.filename}}{{file.file_type}} </h1> 
+		<h3> {{file.filename}}{{file.file_type}} created: {{file.uploadDate}} </h3> 
 	</ul>
 {% endfor %}
+
+{% endblock %}

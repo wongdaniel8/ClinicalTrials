@@ -1,3 +1,9 @@
+
+{% extends 'clinicaltrials/base.html' %}
+{% block body %}
+
+
+
 {% if all_trials %}
 <h1> All Clinical Trials </h1>
 	<ul>
@@ -9,4 +15,10 @@
 {% else %}
 <h1> no trials in data base </h1>
 {% endif %}
+
+
+
+
+
+{% endblock %}
 
