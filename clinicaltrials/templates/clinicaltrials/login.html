@@ -2,11 +2,13 @@
 {% extends 'clinicaltrials/base.html' %}
 {% block body %}
 
-  <h2>Login</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
-  
+
+<form action="{% url 'clinicaltrial:login' %}" method="post">
+	{% csrf_token %}
+    <label for="username">username: </label>
+    <input  type="text" name="name" value="">
+    <input  type="text" name="input_password" value="">
+    <input type="submit" value="Login">
+</form>
+
 {% endblock %}

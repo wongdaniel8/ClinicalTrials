@@ -60,23 +60,39 @@ class UserFormView(View):
 		return render(request, self.template_name, {'form' :form})
 
 
-def login(request):
+
+# Could write this like UserFormView.
+# Written differently to serve as an example of more verbose form usage.
+def userlogin(request): 
 	if request.method == 'GET':
 		return render(request, 'clinicaltrials/login.html')
 	
 	if request.method == 'POST':
-		
+		username = request.POST.get("name", "")
+		input_password = request.POST.get("input_password", "") 
+		user = authenticate(username=username, password=input_password)
+		if user is not None:
+			if user.is_active:
+				login(request, user)					
+				return redirect('clinicaltrial:index')
+		return render(request, 'clinicaltrials/login.html')	
 
-
-	
-	
-	
-
-def logout(request):
+def userlogout(request):
 	logout(request)
 	all_trials = clinicaltrial.objects.all()
 	context = {'all_trials': all_trials }
 	return render(request, 'clinicaltrials/index.html', context)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

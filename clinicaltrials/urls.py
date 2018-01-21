@@ -12,10 +12,10 @@ url(r'^$', views.index, name = 'index'),
 url(r'^register$', views.UserFormView.as_view(), name = 'register'),
 
 #/clinicaltrials/login
-url(r'^login$', views.login, name = 'login'),
+url(r'^login$', views.userlogin, name = 'login'),
 
 #/clinicaltrials/logout
-url(r'^logout$', views.logout, name = 'logout'),
+url(r'^logout$', views.userlogout, name = 'logout'),
 
 #/clinicaltrials/<trial ID>/ = 'detail' pattern
 url(r'^(?P<clinicaltrial_id>[0-9]+)/$', views.detail, name = "detail")

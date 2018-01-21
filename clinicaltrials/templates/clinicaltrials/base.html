@@ -23,6 +23,21 @@
                     <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; {{user}}
                     </a>
                 </li>
+
+                <li class="active">
+                    <a href="{% url 'clinicaltrial:logout' %}">
+                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; logout
+                    </a>
+                </li>
+                <!-- only show login if not logged in  -->
+                {%if user.is_anonymous %} 
+                <li class="active">
+                    <a href="{% url 'clinicaltrial:login' %}">
+                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; login
+                    </a>
+                </li>
+                {% endif %}
+
             </ul>
     </div>
 </nav>
