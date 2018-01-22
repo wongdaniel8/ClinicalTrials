@@ -6,9 +6,14 @@
 <h1> Creation date: {{trial.creationDate}}</h1>
 
 {% for file in allFiles %}
-	<ul> 
-		<h3> {{file.filename}}{{file.file_type}} created: {{file.uploadDate}} </h3> 
+		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
+		<h3> {{file.data.path}} created: {{file.uploadDate}} owner: {{file.owner}} </h3> 
 	</ul>
 {% endfor %}
 
+
+
 {% endblock %}
+
+
+
