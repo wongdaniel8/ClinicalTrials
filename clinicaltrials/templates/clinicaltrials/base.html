@@ -29,6 +29,12 @@
                     <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; logout
                     </a>
                 </li>
+
+                <li class="active">
+                    <a href="{% url 'clinicaltrial:upload' %}">
+                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; upload file
+                    </a>
+                </li>
                 <!-- only show login if not logged in  -->
                 {%if user.is_anonymous %} 
                 <li class="active">

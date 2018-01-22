@@ -9,6 +9,8 @@ from .forms import UserForm, DocumentForm
 from django.utils.encoding import smart_str
 # from django.contrib.auth.forms import UserCreationForm
 
+import os
+
 from .models import clinicaltrial, file  
 # Create your views here.
 
@@ -95,7 +97,7 @@ def model_form_upload(request):
             doc = form.save(commit=False)
             doc.owner = request.user
             doc.filename = request.FILES['data'].name #filename = 'data'?
-            # print("AAA", request.FILES)
+            # print("AAA", request.FILES)  
             # print("NNNNNNN", doc.filename)
             doc.save()
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() } )
@@ -107,15 +109,13 @@ def model_form_upload(request):
 
 
 def download(request, path):
-    # if request.method == 'GET':
-    #     return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() } )
-    print("PPPPP", path)
+    # print("PPPPP", path)
     # print("PPPPP", name)
+    # print("OSOSOSOS", os.getcwd())
     
-    file_name = "stringy" #get the filename of desired excel file
-    path_to_file = path #get the path of desired excel file
-    # path = "Users/student/Desktop/ButteLab/clinicalnetwork/media/ALSDrugReappropriationArticle.pdf"
-    response = HttpResponse(open(path, "rb"), content_type='application/force-download')
+    file_name = "stringy" #what to name
+    path_to_file = path[path.index("media"):] #get the path of desired file, current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
+    response = HttpResponse(open(path_to_file, "rb"), content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
     response['X-Sendfile'] = smart_str(path_to_file)
     return response

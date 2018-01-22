@@ -7,7 +7,8 @@
 
 {% for file in allFiles %}
 		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
-		<h3> {{file.data.path}} created: {{file.uploadDate}} owner: {{file.owner}} </h3> 
+		<!-- interesting how file.filename != file.data.name  ...  -->
+		<h3> {{file.filename}} created: {{file.uploadDate}} owner: {{file.owner}} </h3> 
 	</ul>
 {% endfor %}
 
