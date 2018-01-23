@@ -20,10 +20,13 @@ url(r'^login$', views.userlogin, name = 'login'),
 #/clinicaltrials/logout
 url(r'^logout$', views.userlogout, name = 'logout'),
 
+#/clinicaltrials/user/
+url(r'^user/$', views.userhome, name = 'userhome'),
+
 #/clinicaltrials/<trial ID>/ = 'detail' pattern
 url(r'^(?P<clinicaltrial_id>[0-9]+)/$', views.detail, name = "detail"),
 
-#/clinicaltrials/upload/ = 'upload' pattern
+#/clinicaltrials/upload = 'upload' pattern
 url(r'^upload$', views.model_form_upload, name = "upload"),
 
 # url(r'^download/(?P<path>.*)$', serve, {'document root': settings.MEDIA_ROOT})

@@ -7,8 +7,9 @@ from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserForm, DocumentForm
 from django.utils.encoding import smart_str
-# from django.contrib.auth.forms import UserCreationForm
 
+# from django.contrib.auth.forms import UserCreationForm
+import hashlib
 import os
 
 from .models import clinicaltrial, file  
@@ -28,11 +29,6 @@ def detail(request, clinicaltrial_id):
     except:
         raise Http404("trial does not exist")
     return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles})
-
-
-
-
-
 
 class UserFormView(View):
     form_class = UserForm
@@ -62,8 +58,6 @@ class UserFormView(View):
                     return redirect('clinicaltrial:index')
         return render(request, self.template_name, {'form' :form})
 
-
-
 # Could write this like UserFormView.
 # Written differently to serve as an example of more verbose form usage.
 def userlogin(request): 
@@ -87,12 +81,30 @@ def userlogout(request):
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
 
-
-
+def hash(file):
+    string = file.read()
+    hash_object = hashlib.sha256(string)
+    hex_dig = hash_object.hexdigest()
+    return hex_dig
 
 def model_form_upload(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
+        
+        ##==========================================================
+        ##perform hash validation stuff here in blockchain
+        
+        # print("FFFFFF", request.FILES['data'])
+        # print("GGGG", type(request.FILES['data'])) #django.core.files.uploadedfile.InMemoryUploadedFile
+        file = request.FILES['data']
+        hashString = hash(file)
+        print(hashString)
+        ##==========================================================
+
+
+        
+        
+        
         if form.is_valid():
             doc = form.save(commit=False)
             doc.owner = request.user
@@ -105,7 +117,10 @@ def model_form_upload(request):
         form = DocumentForm()
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
     
-
+def userhome(request):
+    ownedFiles = file.objects.all().filter(owner=request.user)
+    context = {"ownedFiles" : ownedFiles}
+    return render(request, 'clinicaltrials/user_home.html', context)
 
 
 def download(request, path):

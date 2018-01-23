@@ -15,6 +15,7 @@ class clinicaltrial(models.Model):
 class file(models.Model):
 	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)
 	owner = models.ForeignKey(User, on_delete = models.CASCADE, blank=True, null=True, unique = False)
+	# receiver = models.ForeignKey(User, on_delete = models.CASCADE, blank=True, null=True, unique = False)
 	filename = models.CharField(max_length = 100)
 	file_type = models.CharField(max_length = 100, blank=True, null = True) 
 	data = models.FileField()

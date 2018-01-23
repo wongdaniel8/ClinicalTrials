@@ -1,22 +1,15 @@
 {% extends 'clinicaltrials/base.html' %}
 {% block body %}
 
+{{user}}
 
-<h1> {{trial}} </h1>
-<h1> Creation date: {{trial.creationDate}}</h1>
-<br> <br>
-{% for file in allFiles %}
+
+{% for file in ownedFiles %}
 	<ul>
-		<!-- interesting how file.filename != file.data.name  ...  -->
 		<h3> {{file.filename}} created: {{file.uploadDate}} uploaded by: {{file.owner}} </h3> 
 		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
 		<br>
 	</ul>
 {% endfor %}
 
-
-
 {% endblock %}
-
-
-
