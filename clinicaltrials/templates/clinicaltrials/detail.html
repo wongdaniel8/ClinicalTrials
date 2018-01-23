@@ -7,7 +7,7 @@
 <br> <br>
 {% for file in allFiles %}
 	<ul>
-		<h4> {{file.sender}} sent {{file.filename}} to {{file.owner}}</h4>
+		<h4> {{file.sender}} sent {{file.filename}} to {{file.owner}} at {{file.uploadDate}}</h4>
 		<!-- interesting how file.filename != file.data.name  ...  -->
 		<!-- <h3> {{file.filename}} created: {{file.uploadDate}} uploaded by: {{file.owner}} </h3>  -->
 		<!-- <h4> {{file.data.path}} </h4> -->

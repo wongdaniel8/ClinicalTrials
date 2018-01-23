@@ -12,7 +12,9 @@
     <div class="container-fluid">
         <div class="navbar-header>"
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#topNavBar">
-            <a class="navbar-brand" href="{% url 'clinicaltrial:index' %}"> Home </a>
+            <a class="navbar-brand" href="{% url 'clinicaltrial:index' %}"> 
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>&nbsp; 
+            Home </a>
         </div>
 
         <!-- Items -->
@@ -20,21 +22,30 @@
             <ul class="nav navbar-nav">
                 <li class="active">
                     <a href="{% url 'clinicaltrial:userhome' %}">
-                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; {{user}}
+                    <span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span>&nbsp; {{user}}
                     </a>
                 </li>
 
-                <li class="active">
-                    <a href="{% url 'clinicaltrial:logout' %}">
-                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; logout
-                    </a>
-                </li>
 
                 <li class="active">
                     <a href="{% url 'clinicaltrial:upload' %}">
-                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; upload file
+                    <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>&nbsp; upload file
                     </a>
                 </li>
+
+                <li class="active">
+                    <a href="{% url 'clinicaltrial:register' %}">
+                    <span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp; 
+                    register
+                    </a>
+                </li>
+
+                 <li class="active">
+                    <a href="{% url 'clinicaltrial:logout' %}">
+                    <span class="glyphicon glyphicon-off" aria-hidden="true"></span>&nbsp; logout
+                    </a>
+                </li>
+
                 <!-- only show login if not logged in  -->
                 {%if user.is_anonymous %} 
                 <li class="active">

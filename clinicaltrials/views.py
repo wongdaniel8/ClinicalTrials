@@ -7,13 +7,12 @@ from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
 from .forms import UserForm, DocumentForm
 from django.utils.encoding import smart_str
+from django.contrib import messages
 
-# from django.contrib.auth.forms import UserCreationForm
 import hashlib
 import os
 
 from .models import clinicaltrial, file  
-# Create your views here.
 
 def index(request):
     all_trials = clinicaltrial.objects.all()
@@ -80,41 +79,10 @@ def userlogout(request):
     all_trials = clinicaltrial.objects.all()
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
-
-def hash(file):
-    string = file.read()
-    hash_object = hashlib.sha256(string)
-    hex_dig = hash_object.hexdigest()
-    return hex_dig
-
-def model_form_upload(request):
-    if request.method == 'POST':
-        form = DocumentForm(request.POST, request.FILES)
-        
-        ##==========================================================
-        ##perform hash validation stuff here in blockchain
-        
-        # print("FFFFFF", request.FILES['data'])
-        # print("GGGG", type(request.FILES['data'])) #django.core.files.uploadedfile.InMemoryUploadedFile
-        file = request.FILES['data']
-        hashString = hash(file)
-        print(hashString)
-        ##==========================================================
-
-        
-        if form.is_valid():
-            doc = form.save(commit=False)
-            doc.sender = request.user
-            doc.filename = request.FILES['data'].name #filename = 'data'?
-            # print("AAA", request.FILES)  
-            # print("NNNNNNN", doc.filename)
-            doc.save()
-        return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
-    else:
-        form = DocumentForm()
-        return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
     
 def userhome(request):
+    if request.user.is_anonymous:
+        return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
     ownedFiles = file.objects.all().filter(owner=request.user)
     context = {"ownedFiles" : ownedFiles}
     return render(request, 'clinicaltrials/user_home.html', context)
@@ -131,11 +99,48 @@ def download(request, path):
     response['X-Sendfile'] = smart_str(path_to_file)
     return response
 
+def hash(file):
+    string = file.read()
+    hash_object = hashlib.sha256(string)
+    hex_dig = hash_object.hexdigest()
+    return hex_dig
 
+def model_form_upload(request):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        
+        ##==========================================================
+        ##perform hash validation stuff here in blockchain
+        
+        # print("FFFFFF", request.FILES['data'])
+        # print("GGGG", type(request.FILES['data'])) #django.core.files.uploadedfile.InMemoryUploadedFile
+        fileObject = request.FILES['data']
+        hashString = hash(fileObject)
+        print("HHHH" , hashString)
+        ##==========================================================
+        
+        if form.is_valid():
+            doc = form.save(commit=False)
+            doc.filename = request.FILES['data'].name #filename = 'data'?
 
+            for f in file.objects.all():
+                name = f.filename
+                print("FILENAME", name)
+                if doc.filename == name:
+                    if hashString != f.dataHash:
+                        messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict!")
+                        return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+                       # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
 
-
-
+            doc.sender = request.user
+            doc.dataHash = hashString
+            # print("AAA", request.FILES)  
+            # print("NNNNNNN", doc.filename)
+            doc.save()
+        return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+    else:
+        form = DocumentForm()
+        return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 
 
