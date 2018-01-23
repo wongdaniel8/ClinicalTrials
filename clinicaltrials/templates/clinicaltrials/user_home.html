@@ -6,7 +6,7 @@
 
 {% for file in ownedFiles %}
 	<ul>
-		<h3> {{file.filename}} created: {{file.uploadDate}} uploaded by: {{file.owner}} </h3> 
+		<h3> {{file.filename}} uploaded: {{file.uploadDate}} from: {{file.sender}} </h3> 
 		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
 		<br>
 	</ul>

@@ -101,18 +101,15 @@ def model_form_upload(request):
         print(hashString)
         ##==========================================================
 
-
-        
-        
         
         if form.is_valid():
             doc = form.save(commit=False)
-            doc.owner = request.user
+            doc.sender = request.user
             doc.filename = request.FILES['data'].name #filename = 'data'?
             # print("AAA", request.FILES)  
             # print("NNNNNNN", doc.filename)
             doc.save()
-        return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() } )
+        return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
     else:
         form = DocumentForm()
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
@@ -125,10 +122,9 @@ def userhome(request):
 
 def download(request, path):
     # print("PPPPP", path)
-    # print("PPPPP", name)
+    # print("PPPPP", path.name)
     # print("OSOSOSOS", os.getcwd())
-    
-    file_name = "stringy" #what to name
+    file_name = path[path.index("media/") + 6:] #hacky - django appends random string to filename if a file already exists in media with the same name 
     path_to_file = path[path.index("media"):] #get the path of desired file, current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
     response = HttpResponse(open(path_to_file, "rb"), content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)

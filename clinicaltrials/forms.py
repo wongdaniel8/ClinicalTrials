@@ -15,4 +15,3 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = file 
         fields = ('clinicaltrial', 'owner', 'data' )
-        # fields = ('data' ,)
