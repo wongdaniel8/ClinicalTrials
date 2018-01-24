@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import UserForm, DocumentForm
 from django.utils.encoding import smart_str
 from django.contrib import messages
+import simplecrypt
+from django.core.files.base import ContentFile
 
 import hashlib
 import os
@@ -105,24 +107,37 @@ def hash(file):
     hex_dig = hash_object.hexdigest()
     return hex_dig
 
+def returnEncrypted(file):
+    string = file.read()
+    print("JJJJJ", string)
+    encrypted = simplecrypt.encrypt("password", string)
+    return encrypted 
+
+def returnDecrypted(file):
+    string = file.read()
+    print("GGGGG", string)
+    decrypted = simplecrypt.decrypt("password", string).decode('utf8')
+    return decrypted    
+
+
 def model_form_upload(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         
         ##==========================================================
         ##perform hash validation stuff here in blockchain
-        
         # print("FFFFFF", request.FILES['data'])
         # print("GGGG", type(request.FILES['data'])) #django.core.files.uploadedfile.InMemoryUploadedFile
         fileObject = request.FILES['data']
         hashString = hash(fileObject)
         print("HHHH" , hashString)
         ##==========================================================
-        
+
         if form.is_valid():
             doc = form.save(commit=False)
             doc.filename = request.FILES['data'].name #filename = 'data'?
 
+            #check for tampering of file if it was already in blockchain
             for f in file.objects.all():
                 name = f.filename
                 print("FILENAME", name)
@@ -132,14 +147,25 @@ def model_form_upload(request):
                         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
                        # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
 
+            
+
+            if doc.encrypted:
+                byt = returnEncrypted(fileObject)
+                print("RRRRR", byt)
+                doc.data.save(doc.filename, ContentFile(byt))
+            else:
+                print("AAA",returnDecrypted(fileObject))
+
+            
+
             doc.sender = request.user
             doc.dataHash = hashString
             # print("AAA", request.FILES)  
             # print("NNNNNNN", doc.filename)
             doc.save()
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
-    else:
-        form = DocumentForm()
+    else: #if request.method == 'GET':
+        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(author='Daniel Wong')})
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 

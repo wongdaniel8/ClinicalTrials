@@ -18,7 +18,8 @@ class file(models.Model):
 	owner = models.ForeignKey(User, related_name="owner", on_delete = models.CASCADE, blank=True, null=True, unique = False)
 	sender = models.ForeignKey(User, related_name="sender", on_delete = models.CASCADE, blank=True, null=True, unique = False)
 	filename = models.CharField(max_length = 100)
-	file_type = models.CharField(max_length = 100, blank=True, null = True) 
+	encrypted = models.BooleanField(default=False, blank=True)
+	# file_type = models.CharField(max_length = 100, blank=True, null = True) 
 	data = models.FileField()
 	uploadDate = models.DateTimeField(auto_now_add=True)
 	dataHash = models.CharField(max_length = 100, blank = True, null= True)
@@ -32,13 +33,12 @@ class file(models.Model):
 # parent = models.ForeignKey("self")
 
 
-
 # #to encapsulate the transaction into a blockchain 
 # class block(models.Model):
 # 	fileReference = models.ForeignKey(file, on_delete = models.CASCADE, blank=True, null=True)
 # 	index = models.IntegerField(blank=True, null = True)
 # 	hashString = models.CharField(max_length = 500, blank=True, null = True)
-# 	previousHash = models.CharField(max_length = 500, blank=True, null = True)
+	# previousHash = models.CharField(max_length = 500, blank=True, null = True)
 
 
 

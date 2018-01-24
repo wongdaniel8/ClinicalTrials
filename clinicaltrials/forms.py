@@ -14,4 +14,4 @@ class DocumentForm(forms.ModelForm):
     
     class Meta:
         model = file 
-        fields = ('clinicaltrial', 'owner', 'data' )
+        fields = ('clinicaltrial', 'owner', 'encrypted', 'data' )

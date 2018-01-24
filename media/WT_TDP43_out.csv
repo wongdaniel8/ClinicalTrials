@@ -1,6 +1,0 @@
-Query, Drug Perturbation, Marker, Feature Indices, Features, Sample Size, SVM Accuracy
-WT_TDP43_,Bortezomib,zernike_moment: Hoechst | intensity: Hoechst,1553 | 8,markerset38: zernike_8-4 | markerset36: Hoechst_CIav,64,0.95
-WT_TDP43_,Thapsigargin,morphology: Hoechst | zernike_moment: LC3A/B,1836 | 425,markerset38: BdbLength_N | markerset36: zernike_4-2,64,1.0
-WT_TDP43_,DMSO,intensity: BIP | Haralick texture: CHOP,1423 | 1810,markerset38: BIP_YI50 | markerset38: haralick_sum_avg_mean,96,0.827586206897
-WT_TDP43_,Bix,morphology: Hoechst | intensity: BIP,599 | 1432,markerset36: BdbLength_N | markerset38: BIP_RYCItot,64,0.9
-WT_TDP43_,Rotenone,morphology: Hoechst | intensity: CHOP,1841 | 1467,markerset38: Solidity_N | markerset38: CHOP_DI5,64,0.9
