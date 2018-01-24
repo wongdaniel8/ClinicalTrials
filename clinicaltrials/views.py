@@ -89,11 +89,7 @@ def userhome(request):
     context = {"ownedFiles" : ownedFiles}
     return render(request, 'clinicaltrials/user_home.html', context)
 
-
 def download(request, path):
-    # print("PPPPP", path)
-    # print("PPPPP", path.name)
-    # print("OSOSOSOS", os.getcwd())
     file_name = path[path.index("media/") + 6:] #hacky - django appends random string to filename if a file already exists in media with the same name 
     path_to_file = path[path.index("media"):] #get the path of desired file, current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
     response = HttpResponse(open(path_to_file, "rb"), content_type='application/force-download')
@@ -102,23 +98,28 @@ def download(request, path):
     return response
 
 def decryptdownload(request, path):
+    #path starts at root: /Users/student/Desktop/ButteLab/clinicalnetwork/media/{file}
+    #current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
+    input_password = request.POST.get("decryptpassword","")
     file_name = path[path.index("media/") + 6:] 
     path_to_file = path[path.index("media"):] 
-    print("PATHPATH", path_to_file)
-    with open(path_to_file, "rb") as f:
-        decrypted = returnDecrypted(f.read())
-    print("XXXX", decrypted)
-    save_path = "media/"
-    new_file_name = file_name.replace(".txt","") + "_decrypted.txt"
-    path_to_new_file = os.path.join(save_path, new_file_name)         
-    f = open(path_to_new_file, "w")
-    f.write(decrypted)
-    f.close()
-    print("PPPP", path_to_new_file)
-    response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
-    response['X-Sendfile'] = smart_str(path_to_new_file)
-    return response
+    try:
+        with open(path_to_file, "rb") as f:
+            decrypted = returnDecrypted(f.read(), input_password) #decrypted is a decoded string
+        save_path = "media/"
+        new_file_name = file_name.replace(".txt","") + "_decrypted.txt"
+        path_to_new_file = os.path.join(save_path, new_file_name)         
+        f = open(path_to_new_file, "w")
+        f.write(decrypted)
+        f.close()
+        response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
+        response['X-Sendfile'] = smart_str(path_to_new_file)
+        return response
+    except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
+        messages.error(request, "wrong passcode")        
+        trial = clinicaltrial.objects.get(pk = 2)
+        return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': trial.file_set.all()})
 
 
 def hash(fileBytes):
@@ -126,13 +127,13 @@ def hash(fileBytes):
     hex_dig = hash_object.hexdigest()
     return hex_dig
 
-def returnEncrypted(fileBytes):
-    encrypted = simplecrypt.encrypt("password", fileBytes)
+def returnEncrypted(fileBytes, password):
+    encrypted = simplecrypt.encrypt(password, fileBytes)
     print("EEEE", encrypted)
     return encrypted 
 
-def returnDecrypted(fileBytes):
-    decrypted = simplecrypt.decrypt("password", fileBytes).decode('utf8')
+def returnDecrypted(fileBytes, password):
+    decrypted = simplecrypt.decrypt(password, fileBytes).decode('utf8')
     return decrypted    
 
 
@@ -167,11 +168,11 @@ def model_form_upload(request):
             
             #if encrypted is set to True, change the contents of the file to the encrypted bytes
             if doc.encrypted:
-                byt = returnEncrypted(fileBytes)
+                byt = returnEncrypted(fileBytes, doc.password)
                 print("RRRRR", byt)
                 doc.data.save(doc.filename, ContentFile(byt))
-            else:
-                print("AAA",returnDecrypted(fileBytes))
+            # else:
+            #     print("AAA",returnDecrypted(fileBytes))
 
 
             doc.sender = request.user

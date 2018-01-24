@@ -14,7 +14,21 @@
 		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
 		<br>
 		{% if file.encrypted %}
-			<a href = "{% url 'clinicaltrial:decryptdownload' file.data.path %}"> Download Decrypted File </a>
+			<!-- <a href = "{% url 'clinicaltrial:decryptdownload' file.data.path %}"> Download Decrypted File </a> -->
+			<form action="{% url 'clinicaltrial:decryptdownload' file.data.path %}" method="post">
+				{% csrf_token %}
+				password: <input type="text" name="decryptpassword" value="">
+				<input type="submit" value="download decrypted file">
+			</form>
+
+			{% if messages %}
+			<ul class="messages">
+			    {% for message in messages %}
+			    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+			    {% endfor %}
+			</ul>
+			{% endif %}
+
 		{% endif %}
 
 		<br>

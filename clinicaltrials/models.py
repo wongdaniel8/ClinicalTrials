@@ -19,7 +19,7 @@ class file(models.Model):
 	sender = models.ForeignKey(User, related_name="sender", on_delete = models.CASCADE, blank=True, null=True, unique = False)
 	filename = models.CharField(max_length = 100)
 	encrypted = models.BooleanField(default=False, blank=True)
-	# file_type = models.CharField(max_length = 100, blank=True, null = True) 
+	password = models.CharField(max_length=500, blank=True, default='')
 	data = models.FileField()
 	uploadDate = models.DateTimeField(auto_now_add=True)
 	dataHash = models.CharField(max_length = 100, blank = True, null= True)
