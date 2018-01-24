@@ -101,22 +101,38 @@ def download(request, path):
     response['X-Sendfile'] = smart_str(path_to_file)
     return response
 
-def hash(file):
-    string = file.read()
-    hash_object = hashlib.sha256(string)
+def decryptdownload(request, path):
+    file_name = path[path.index("media/") + 6:] 
+    path_to_file = path[path.index("media"):] 
+    print("PATHPATH", path_to_file)
+    with open(path_to_file, "rb") as f:
+        decrypted = returnDecrypted(f.read())
+    print("XXXX", decrypted)
+    save_path = "media/"
+    new_file_name = file_name.replace(".txt","") + "_decrypted.txt"
+    path_to_new_file = os.path.join(save_path, new_file_name)         
+    f = open(path_to_new_file, "w")
+    f.write(decrypted)
+    f.close()
+    print("PPPP", path_to_new_file)
+    response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
+    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
+    response['X-Sendfile'] = smart_str(path_to_new_file)
+    return response
+
+
+def hash(fileBytes):
+    hash_object = hashlib.sha256(fileBytes)
     hex_dig = hash_object.hexdigest()
     return hex_dig
 
-def returnEncrypted(file):
-    string = file.read()
-    print("JJJJJ", string)
-    encrypted = simplecrypt.encrypt("password", string)
+def returnEncrypted(fileBytes):
+    encrypted = simplecrypt.encrypt("password", fileBytes)
+    print("EEEE", encrypted)
     return encrypted 
 
-def returnDecrypted(file):
-    string = file.read()
-    print("GGGGG", string)
-    decrypted = simplecrypt.decrypt("password", string).decode('utf8')
+def returnDecrypted(fileBytes):
+    decrypted = simplecrypt.decrypt("password", fileBytes).decode('utf8')
     return decrypted    
 
 
@@ -129,7 +145,8 @@ def model_form_upload(request):
         # print("FFFFFF", request.FILES['data'])
         # print("GGGG", type(request.FILES['data'])) #django.core.files.uploadedfile.InMemoryUploadedFile
         fileObject = request.FILES['data']
-        hashString = hash(fileObject)
+        fileBytes = fileObject.read() #can only call read once on a file, else will return empty
+        hashString = hash(fileBytes)
         print("HHHH" , hashString)
         ##==========================================================
 
@@ -143,20 +160,19 @@ def model_form_upload(request):
                 print("FILENAME", name)
                 if doc.filename == name:
                     if hashString != f.dataHash:
-                        messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict!")
+                        messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict.")
                         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
                        # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
 
             
-
+            #if encrypted is set to True, change the contents of the file to the encrypted bytes
             if doc.encrypted:
-                byt = returnEncrypted(fileObject)
+                byt = returnEncrypted(fileBytes)
                 print("RRRRR", byt)
                 doc.data.save(doc.filename, ContentFile(byt))
             else:
-                print("AAA",returnDecrypted(fileObject))
+                print("AAA",returnDecrypted(fileBytes))
 
-            
 
             doc.sender = request.user
             doc.dataHash = hashString

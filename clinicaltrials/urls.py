@@ -30,7 +30,10 @@ url(r'^(?P<clinicaltrial_id>[0-9]+)/$', views.detail, name = "detail"),
 url(r'^upload$', views.model_form_upload, name = "upload"),
 
 # url(r'^download/(?P<path>.*)$', serve, {'document root': settings.MEDIA_ROOT})
-url(r'^download/(?P<path>.*)$', views.download, name="download")
+url(r'^download/(?P<path>.*)$', views.download, name="download"),
+
+# url(r'^decryptdownload/(?P<path>.*)$'
+url(r'^decrpytdownload/(?P<path>.*)$', views.decryptdownload, name="decryptdownload")
 
 
 ]
