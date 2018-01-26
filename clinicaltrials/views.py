@@ -14,9 +14,17 @@ from django.core.files.base import ContentFile
 import hashlib
 import os
 
-from .models import clinicaltrial, file  
+from .models import clinicaltrial, file, block, User 
 
 def index(request):
+    # for person in User.objects.all():
+    #     if not person.is_superuser:
+    #         print(person)
+    #         blocks = person.block_set.order_by('index')
+    #         for b in blocks:
+    #             print(b.owner)
+    #         print(blocks)
+
     all_trials = clinicaltrial.objects.all()
     # template = loader.get_template('clinicaltrials/index.html')
     context = {'all_trials': all_trials }
@@ -56,7 +64,15 @@ class UserFormView(View):
             if user is not None:
                 if user.is_active:
                     login(request, user)
+                    
+                    #initiate the new user's ledger
+                    genesis = block(owner=user, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
+                    genesis.save()
+
                     return redirect('clinicaltrial:index')
+
+           
+
         return render(request, self.template_name, {'form' :form})
 
 # Could write this like UserFormView.
@@ -86,7 +102,8 @@ def userhome(request):
     if request.user.is_anonymous:
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
     ownedFiles = file.objects.all().filter(owner=request.user)
-    context = {"ownedFiles" : ownedFiles}
+    blocks = request.user.block_set.order_by('index')
+    context = {"ownedFiles" : ownedFiles, "blocks" : blocks}
     return render(request, 'clinicaltrials/user_home.html', context)
 
 def download(request, path):
@@ -136,6 +153,14 @@ def returnDecrypted(fileBytes, password):
     decrypted = simplecrypt.decrypt(password, fileBytes).decode('utf8')
     return decrypted    
 
+def addToEveryonesLedger(input_block, broadcaster):
+    for person in User.objects.all():
+        if person != broadcaster: #broadcaster already saved block
+            lastBlock = person.block_set.order_by('index').last()
+            print("JJJJ", input_block.fileReference)
+            #copy into new block, but with different owner
+            newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString)
+            newBlock.save()
 
 def model_form_upload(request):
     if request.method == 'POST':
@@ -148,7 +173,7 @@ def model_form_upload(request):
         fileObject = request.FILES['data']
         fileBytes = fileObject.read() #can only call read once on a file, else will return empty
         hashString = hash(fileBytes)
-        print("HHHH" , hashString)
+        print("HASH STRING" , hashString)
         ##==========================================================
 
         if form.is_valid():
@@ -156,31 +181,47 @@ def model_form_upload(request):
             doc.filename = request.FILES['data'].name #filename = 'data'?
 
             #check for tampering of file if it was already in blockchain
-            for f in file.objects.all():
-                name = f.filename
-                print("FILENAME", name)
-                if doc.filename == name:
-                    if hashString != f.dataHash:
-                        messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict.")
-                        return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
-                       # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
-
+            # for f in file.objects.all():
+            #     name = f.filename
+            #     print("FILENAME", name)
+            #     if doc.filename == name:
+            #         if hashString != f.dataHash:
+            #             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict.")
+            #             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+            #            # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
             
+            
+            #check for tampering of file if it was already in blockchain
+            for person in User.objects.all():
+                if not person.is_superuser:
+                    blocks = person.block_set.order_by('index')
+                    if len(blocks) > 1:
+                        for b in blocks:
+                            if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
+                                messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
+                                return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+
+                    
             #if encrypted is set to True, change the contents of the file to the encrypted bytes
             if doc.encrypted:
                 byt = returnEncrypted(fileBytes, doc.password)
                 print("RRRRR", byt)
                 doc.data.save(doc.filename, ContentFile(byt))
-            # else:
-            #     print("AAA",returnDecrypted(fileBytes))
-
 
             doc.sender = request.user
             doc.dataHash = hashString
-            # print("AAA", request.FILES)  
-            # print("NNNNNNN", doc.filename)
             doc.save()
+
+            #add new block to everyone's ledger
+            lastBlock = request.user.block_set.order_by('index').last()
+            print("LLLLL", lastBlock)
+            b = block(owner=request.user, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
+            b.save()
+            addToEveryonesLedger(b, request.user) 
+
+
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+    
     else: #if request.method == 'GET':
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(author='Daniel Wong')})
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})

@@ -34,11 +34,13 @@ class file(models.Model):
 
 
 # #to encapsulate the transaction into a blockchain 
-# class block(models.Model):
-# 	fileReference = models.ForeignKey(file, on_delete = models.CASCADE, blank=True, null=True)
-# 	index = models.IntegerField(blank=True, null = True)
-# 	hashString = models.CharField(max_length = 500, blank=True, null = True)
-	# previousHash = models.CharField(max_length = 500, blank=True, null = True)
+class block(models.Model):
+	owner = models.ForeignKey(User, on_delete = models.CASCADE, blank=True, null=True)
+	index = models.IntegerField(blank=True, null = True)
+	fileReference = models.ForeignKey(file, on_delete = models.CASCADE, blank=True, null=True)
+	hashString = models.CharField(max_length = 500, blank=True, null = True)
+	previousHash = models.CharField(max_length = 500, blank=True, null = True)
+	timeStamp = models.DateTimeField(auto_now_add=True)
 
 
 
