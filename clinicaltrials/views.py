@@ -17,16 +17,8 @@ import os
 from .models import clinicaltrial, file, block, User 
 
 def index(request):
-    # for person in User.objects.all():
-    #     if not person.is_superuser:
-    #         print(person)
-    #         blocks = person.block_set.order_by('index')
-    #         for b in blocks:
-    #             print(b.owner)
-    #         print(blocks)
-
+    validate(request.user)
     all_trials = clinicaltrial.objects.all()
-    # template = loader.get_template('clinicaltrials/index.html')
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
 
@@ -82,7 +74,6 @@ def userlogin(request):
         return render(request, 'clinicaltrials/login.html')
     
     if request.method == 'POST':
-        print("AAAAAA", request.POST)
         username = request.POST.get("name", "")
         input_password = request.POST.get("input_password", "") 
         user = authenticate(username=username, password=input_password)
@@ -145,19 +136,18 @@ def hash(fileBytes):
     return hex_dig
 
 def returnEncrypted(fileBytes, password):
-    encrypted = simplecrypt.encrypt(password, fileBytes)
-    print("EEEE", encrypted)
+    encrypted = simplecrypt.encrypt(password, fileBytes) #returns bytes
     return encrypted 
 
 def returnDecrypted(fileBytes, password):
     decrypted = simplecrypt.decrypt(password, fileBytes).decode('utf8')
     return decrypted    
 
+
 def addToEveryonesLedger(input_block, broadcaster):
     for person in User.objects.all():
         if person != broadcaster: #broadcaster already saved block
             lastBlock = person.block_set.order_by('index').last()
-            print("JJJJ", input_block.fileReference)
             #copy into new block, but with different owner
             newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString)
             newBlock.save()
@@ -165,31 +155,15 @@ def addToEveryonesLedger(input_block, broadcaster):
 def model_form_upload(request):
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
-        
-        ##==========================================================
-        ##perform hash validation stuff here in blockchain
-        # print("FFFFFF", request.FILES['data'])
-        # print("GGGG", type(request.FILES['data'])) #django.core.files.uploadedfile.InMemoryUploadedFile
+
+        #obtain hash string of the contents of the file here 
         fileObject = request.FILES['data']
         fileBytes = fileObject.read() #can only call read once on a file, else will return empty
         hashString = hash(fileBytes)
-        print("HASH STRING" , hashString)
-        ##==========================================================
 
         if form.is_valid():
             doc = form.save(commit=False)
-            doc.filename = request.FILES['data'].name #filename = 'data'?
-
-            #check for tampering of file if it was already in blockchain
-            # for f in file.objects.all():
-            #     name = f.filename
-            #     print("FILENAME", name)
-            #     if doc.filename == name:
-            #         if hashString != f.dataHash:
-            #             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict.")
-            #             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
-            #            # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
-            
+            doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
             
             #check for tampering of file if it was already in blockchain
             for person in User.objects.all():
@@ -199,25 +173,21 @@ def model_form_upload(request):
                         if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
                             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
                             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
-
-                    
+            
             #if encrypted is set to True, change the contents of the file to the encrypted bytes
             if doc.encrypted:
-                byt = returnEncrypted(fileBytes, doc.password)
-                print("RRRRR", byt)
+                byt = returnEncrypted(fileBytes, doc.password) #will return bytes
                 doc.data.save(doc.filename, ContentFile(byt))
 
             doc.sender = request.user
             doc.dataHash = hashString
-            doc.save()
+            doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
 
             #add new block to everyone's ledger
             lastBlock = request.user.block_set.order_by('index').last()
-            print("LLLLL", lastBlock)
             b = block(owner=request.user, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
             b.save()
             addToEveryonesLedger(b, request.user) 
-
 
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
     
@@ -226,7 +196,54 @@ def model_form_upload(request):
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 
+def initAllGenesis():
+    """
+    lazy method to delete all block and generate new genesis blocks for each user, only meant to be used in development
+    """
+    blocks = block.objects.all()
+    blocks.delete()
 
+    for person in User.objects.all():
+        genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
+        genesis.save()
+
+def validate(user):
+    #rerun block chain hash calculations from beginning with current files in database and compare to ledger...
+    # initAllGenesis()
+    passing = True
+    blocks = user.block_set.order_by('index')
+    previousBlock = blocks[1] #ignore genesis block
+    for b in blocks[2:]:
+        prevDataHash = hash(previousBlock.fileReference.data.read())
+        passing = (b.hashString == hash(str.encode(previousBlock.hashString + prevDataHash)))
+        if not passing:
+            print("Failed, invalid blockchain")
+            return False
+        previousBlock = b
+    print("Passed, this is a valid blockchain")
+    return passing
+
+
+
+
+
+
+
+
+
+
+#======================================================================================
+
+#check for tampering of file if it was already in blockchain
+            # for f in file.objects.all():
+            #     name = f.filename
+            #     print("FILENAME", name)
+            #     if doc.filename == name:
+            #         if hashString != f.dataHash:
+            #             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict.")
+            #             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+            #            # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
+            
 
 
 

@@ -42,6 +42,8 @@ class block(models.Model):
 	previousHash = models.CharField(max_length = 500, blank=True, null = True)
 	timeStamp = models.DateTimeField(auto_now_add=True)
 
+	def __str__(self):
+		return self.owner.username + "_block" + str(self.index)
 
 
 
