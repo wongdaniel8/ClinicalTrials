@@ -195,11 +195,10 @@ def model_form_upload(request):
             for person in User.objects.all():
                 if not person.is_superuser:
                     blocks = person.block_set.order_by('index')
-                    if len(blocks) > 1:
-                        for b in blocks:
-                            if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
-                                messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
-                                return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+                    for b in blocks[1:]:
+                        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
+                            messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
+                            return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
                     
             #if encrypted is set to True, change the contents of the file to the encrypted bytes
