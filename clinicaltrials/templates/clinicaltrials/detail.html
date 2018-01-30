@@ -3,14 +3,12 @@
 
 
 <h1> {{trial}} </h1>
-<h1> Creation date: {{trial.creationDate}}</h1>
+<h3> Creation date: {{trial.creationDate}}</h3>
 <br> <br>
+
 {% for file in allFiles %}
 	<ul>
 		<h4> {{file.sender}} sent {{file.filename}} to {{file.owner}} at {{file.uploadDate}}</h4>
-		<!-- interesting how file.filename != file.data.name  ...  -->
-		<!-- <h3> {{file.filename}} created: {{file.uploadDate}} uploaded by: {{file.owner}} </h3>  -->
-		<!-- <h4> {{file.data.path}} </h4> -->
 		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
 		<br>
 		{% if file.encrypted %}

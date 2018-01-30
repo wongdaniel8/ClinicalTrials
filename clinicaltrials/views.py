@@ -10,14 +10,17 @@ from django.utils.encoding import smart_str
 from django.contrib import messages
 import simplecrypt
 from django.core.files.base import ContentFile
-
 import hashlib
 import os
-
 from .models import clinicaltrial, file, block, User 
 
 def index(request):
-    validate(request.user)
+
+    # initAllGenesis()
+    # validate(request.user)
+    # replaceWithLongest(User.objects.all().get(username = "Genentech2"))
+
+
     all_trials = clinicaltrial.objects.all()
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
@@ -94,12 +97,21 @@ def userhome(request):
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
     ownedFiles = file.objects.all().filter(owner=request.user)
     blocks = request.user.block_set.order_by('index')
-    context = {"ownedFiles" : ownedFiles, "blocks" : blocks}
+    validityMessage = validate(request.user)[1]
+    context = {"ownedFiles" : ownedFiles, "blocks" : blocks, "validityMessage": validityMessage}
     return render(request, 'clinicaltrials/user_home.html', context)
 
+# def download(request, path, name):
+#     print("PPP", path)
+#     print("QQQQ", name)
+#     file_name = name
+#     path_to_file = path + "/" + file_name 
+
 def download(request, path):
-    file_name = path[path.index("media/") + 6:] #hacky - django appends random string to filename if a file already exists in media with the same name 
+    print("PPP", path)
+    file_name = path[path.index("media/") + 6:]#hacky - django appends random string to filename if a file already exists in media with the same name 
     path_to_file = path[path.index("media"):] #get the path of desired file, current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
+    
     response = HttpResponse(open(path_to_file, "rb"), content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
     response['X-Sendfile'] = smart_str(path_to_file)
@@ -131,6 +143,9 @@ def decryptdownload(request, path):
 
 
 def hash(fileBytes):
+    """
+    input bytes, output String
+    """
     hash_object = hashlib.sha256(fileBytes)
     hex_dig = hash_object.hexdigest()
     return hex_dig
@@ -149,7 +164,7 @@ def addToEveryonesLedger(input_block, broadcaster):
         if person != broadcaster: #broadcaster already saved block
             lastBlock = person.block_set.order_by('index').last()
             #copy into new block, but with different owner
-            newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString)
+            newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString, timeStamp=input_block.timeStamp)
             newBlock.save()
 
 def model_form_upload(request):
@@ -159,6 +174,7 @@ def model_form_upload(request):
         #obtain hash string of the contents of the file here 
         fileObject = request.FILES['data']
         fileBytes = fileObject.read() #can only call read once on a file, else will return empty
+        print(".read() result", fileBytes)
         hashString = hash(fileBytes)
 
         if form.is_valid():
@@ -170,6 +186,7 @@ def model_form_upload(request):
                 if not person.is_superuser:
                     blocks = person.block_set.order_by('index')
                     for b in blocks[1:]:
+                        print("BBBB", b.fileReference.filename)
                         if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
                             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
                             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
@@ -182,17 +199,22 @@ def model_form_upload(request):
             doc.sender = request.user
             doc.dataHash = hashString
             doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
-
-            #add new block to everyone's ledger
+                       #not an issue except for when distributing files for download, the name will be annoying
+                       #blockchain only records filenames of what the user uploads, not internal media storage
+            
+            #add to own ledger
             lastBlock = request.user.block_set.order_by('index').last()
             b = block(owner=request.user, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
             b.save()
+
+            #add new block to everyone's ledger
             addToEveryonesLedger(b, request.user) 
 
         return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
     
     else: #if request.method == 'GET':
-        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(author='Daniel Wong')})
+        #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
+        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)})
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 
@@ -208,29 +230,79 @@ def initAllGenesis():
         genesis.save()
 
 def validate(user):
-    #rerun block chain hash calculations from beginning with current files in database and compare to ledger...
+    """
+    checks if user has a valid blockchain:
+    rerun hash calculations from beginning with current files in database and compare to user's ledger
+    """
     # initAllGenesis()
     passing = True
     blocks = user.block_set.order_by('index')
+    print(blocks.count())
+    if blocks.count() <= 1:
+        print("Passed, this is a valid blockchain")
+        return True, "Passed, this is a valid blockchain"
+    if blocks.count() == 2:
+        recomputedHash = hash(str.encode(blocks[0].hashString + hash(blocks[1].fileReference.data.read())))
+        if recomputedHash == blocks[1].hashString:
+            return True, "Passed, this is a valid blockchain" 
+        return False, "block at index 2 has been falsified"    
     previousBlock = blocks[1] #ignore genesis block
     for b in blocks[2:]:
         prevDataHash = hash(previousBlock.fileReference.data.read())
         passing = (b.hashString == hash(str.encode(previousBlock.hashString + prevDataHash)))
         if not passing:
-            print("Failed, invalid blockchain")
-            return False
+            print("Failed, invalid blockchain at block index " + str(b.index - 1) + ", file: " + previousBlock.fileReference.filename)
+            return False, "Failed, invalid blockchain at block index " + str(b.index - 1) + ", file: " + previousBlock.fileReference.filename
         previousBlock = b
     print("Passed, this is a valid blockchain")
-    return passing
+    return passing, "Passed, this is a valid blockchain"
+
+def replaceWithLongest(user):
+    """
+    replaces current user's blockchain with the longest one in the network, used when adding new nodes to the network
+    """
+    greatestLength = -1
+    longestNode = user
+    for person in User.objects.all():
+        if person != user:
+            if validate(person)[0]:
+                # blockLength = person.block_set.order_by('index').last().index
+                blockLength = person.block_set.all().count()
+                if blockLength > greatestLength:
+                    greatestLength = blockLength
+                    longestNode = person
+
+    #delete user's blockchain
+    originalBlocks = user.block_set.all()
+    originalBlocks.delete()
+
+    #replace with longest valid chain
+    for input_block in longestNode.block_set.order_by('index'):
+        newBlock = block(owner=user, index = input_block.index, fileReference=input_block.fileReference, previousHash = input_block.hashString, hashString=input_block.hashString, timeStamp=input_block.timeStamp)
+        newBlock.save()
+
+
+def getConsensus():
+    """
+    get a universal blockchain that everyone agrees on???
+    """
+    return
+
+
+#for production:
+# only keep local ledger -- can download json of database
+# when upload/send file to someone else, update own local ledger 
+# broadcast out potential transaction to all other nodes
+
+# other nodes:
+# when receiving transaction broadcast, check for file conflict with own ledger in network
+#     if conflict broadcast out vote to reject transaction
+#     if correct broadcast out vote to accept transaction
+# take majority vote and update all ledgers accordingly (including global/FDA/regulator ledger), or reject original transaction
 
 
 
-
-
-
-
-
-
+#
 
 #======================================================================================
 
