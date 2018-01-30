@@ -60,8 +60,19 @@
 	            <td>{{block.fileReference.sender}}</td>
 	            <td>{{block.fileReference.owner}}</td>
 	            
-	            <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> </td> 
-			
+	            <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> 
+	            
+	            {% if block.fileReference.encrypted %}
+	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
+						{% csrf_token %}
+						<input type="text" name="decryptpassword" value="">
+						<br>
+						<input type="submit" value="download decrypted file">
+					</form>
+				
+	            {% endif %}
+				</td>
+
 	            <td>{{block.previousHash}}</td>
 	            <td>{{block.hashString}}</td>
 	        </tr>

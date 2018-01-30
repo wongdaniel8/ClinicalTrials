@@ -16,7 +16,7 @@ from .models import clinicaltrial, file, block, User
 
 def index(request):
 
-    # initAllGenesis()
+    initAllGenesis()
     # validate(request.user)
     # replaceWithLongest(User.objects.all().get(username = "Genentech2"))
 
@@ -120,6 +120,8 @@ def download(request, path):
 def decryptdownload(request, path):
     #path starts at root: /Users/student/Desktop/ButteLab/clinicalnetwork/media/{file}
     #current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
+    print("DDDDD", os.getcwd())
+    print("PPPP" ,path)
     input_password = request.POST.get("decryptpassword","")
     file_name = path[path.index("media/") + 6:] 
     path_to_file = path[path.index("media"):] 
@@ -139,7 +141,10 @@ def decryptdownload(request, path):
     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
         messages.error(request, "wrong passcode")        
         trial = clinicaltrial.objects.get(pk = 2)
-        return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': trial.file_set.all()})
+        # return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': trial.file_set.all()})
+        # return redirect("clinicaltrial:index")
+        return redirect("clinicaltrial:userhome")
+
 
 
 def hash(fileBytes):
@@ -176,28 +181,34 @@ def model_form_upload(request):
         fileBytes = fileObject.read() #can only call read once on a file, else will return empty
         print(".read() result", fileBytes)
         hashString = hash(fileBytes)
+        print("hash String", hashString)
 
         if form.is_valid():
             doc = form.save(commit=False)
-            doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
             
             #check for tampering of file if it was already in blockchain
             for person in User.objects.all():
                 if not person.is_superuser:
                     blocks = person.block_set.order_by('index')
                     for b in blocks[1:]:
-                        print("BBBB", b.fileReference.filename)
+                        print("BBBB", b.fileReference.filename, b.fileReference.data.read(), b.fileReference.dataHash)
+                    for b in blocks[1:]:
                         if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
                             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
                             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
             
-            #if encrypted is set to True, change the contents of the file to the encrypted bytes
+            #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
             if doc.encrypted:
                 byt = returnEncrypted(fileBytes, doc.password) #will return bytes
+                doc.dataHash = hash(byt)
+                doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
                 doc.data.save(doc.filename, ContentFile(byt))
+            else:
+                doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
+                doc.dataHash = hashString
 
             doc.sender = request.user
-            doc.dataHash = hashString
+            # doc.dataHash = hashString
             doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
                        #not an issue except for when distributing files for download, the name will be annoying
                        #blockchain only records filenames of what the user uploads, not internal media storage
@@ -220,7 +231,7 @@ def model_form_upload(request):
 
 def initAllGenesis():
     """
-    lazy method to delete all block and generate new genesis blocks for each user, only meant to be used in development
+    lazy method to delete all blocks and files and generate new genesis blocks for each user, only meant to be used in development
     """
     blocks = block.objects.all()
     blocks.delete()
@@ -228,6 +239,9 @@ def initAllGenesis():
     for person in User.objects.all():
         genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
         genesis.save()
+
+    files = file.objects.all()
+    files.delete()
 
 def validate(user):
     """
@@ -246,13 +260,14 @@ def validate(user):
         if recomputedHash == blocks[1].hashString:
             return True, "Passed, this is a valid blockchain" 
         return False, "block at index 2 has been falsified"    
-    previousBlock = blocks[1] #ignore genesis block
-    for b in blocks[2:]:
-        prevDataHash = hash(previousBlock.fileReference.data.read())
-        passing = (b.hashString == hash(str.encode(previousBlock.hashString + prevDataHash)))
+    previousBlock = blocks[0]
+    for b in blocks[1:]: #first block with file is blocks[1[]]
+        # print("BBBBBB", b.index, b.fileReference.filename)
+        recomputedHashCurrent = hash(b.fileReference.data.read())
+        passing = (b.hashString == hash(str.encode(previousBlock.hashString + recomputedHashCurrent)))
         if not passing:
-            print("Failed, invalid blockchain at block index " + str(b.index - 1) + ", file: " + previousBlock.fileReference.filename)
-            return False, "Failed, invalid blockchain at block index " + str(b.index - 1) + ", file: " + previousBlock.fileReference.filename
+            print("Failed, invalid blockchain at block index " + str(b.index) + ", file: " + b.fileReference.filename)
+            return False, "Failed, invalid blockchain at block index " + str(b.index) + ", file: " + b.fileReference.filename
         previousBlock = b
     print("Passed, this is a valid blockchain")
     return passing, "Passed, this is a valid blockchain"
