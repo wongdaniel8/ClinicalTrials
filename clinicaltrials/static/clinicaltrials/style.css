@@ -1,17 +1,32 @@
-body {
-	background-color: blue;
-    height: 100%;
-    width: 50%;
+body{
+	margin-left:30px;
+	margin-right:30px;
 }
-.bg { 
-    /* The image used */
-    background-image: url("https://mdbootstrap.com/img/Photos/Horizontal/Nature/full page/img(11).jpg");
 
-    /* Half height */
-    height: 50%; 
-
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+#passing {
+	color:green ;
 }
+
+.navbar-default {
+	margin-bottom: 0px;
+	/*margin-left: -20px*/
+}
+
+#user-title{
+	background: #72ceff;
+	color:white;
+	/*background: #0bb0ba; logo: #0bb0ba*/
+	padding:5px;
+	text-align: center;
+}
+
+#block-title {
+	background: #72ceff;
+	color:white;
+	
+	/*background: #0bb0ba;*/
+
+	padding:5px;
+	text-align: center;
+}
+

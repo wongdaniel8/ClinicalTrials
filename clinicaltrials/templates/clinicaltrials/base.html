@@ -6,7 +6,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <!-- <link rel="stylesheet" type = "text/css" href="{% static 'clinicaltrials/style.css' %}"/> -->
+    <link rel="stylesheet" type = "text/css" href="{% static 'clinicaltrials/style.css' %}"/>
+    <script type="text/javascript" src="{% static 'clinicaltrials/myscript.js' %}"></script>
 </head>
 <body>
 <nav class ="navbar navbar-default"> 
@@ -51,7 +52,7 @@
                 {%if user.is_anonymous %} 
                 <li class="active">
                     <a href="{% url 'clinicaltrial:login' %}">
-                    <span class="glyphicon glyphicon-music" aria-hidden="true"></span>&nbsp; login
+                    <span class="glyphicon glyphicon-link" aria-hidden="true"></span>&nbsp; login
                     </a>
                 </li>
                 {% endif %}

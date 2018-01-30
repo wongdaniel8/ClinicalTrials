@@ -4,7 +4,8 @@
 
 {% block body %}
 
-<h1> {{user}}'s Received Files</h1>
+<!-- <div id="user-title"><h1> {{user}}'s Received Files</h1></div> -->
+<div id="user-title"><h2> Received Files</h2></div>
 <br>
 {% ifequal ownedFiles.count 0 %}
 	<h4> no files received</h4>
@@ -23,8 +24,10 @@
 
 
 
-<h1> {{user}}'s Blockchain Ledger</h1>
-{{validityMessage}}
+<!-- <h1> {{user}}'s Blockchain Ledger</h1> -->
+
+<div id="block-title"><h2>Blockchain Ledger</h2></div>
+<h4 id = "passing">{{validityMessage}}</h4>
 <!-- <h3> validity: {{validity}} </h3> -->
 <!--Table--> 
 <table class="table table-hover">

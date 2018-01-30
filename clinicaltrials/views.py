@@ -16,7 +16,7 @@ from .models import clinicaltrial, file, block, User
 
 def index(request):
 
-    initAllGenesis()
+    # initAllGenesis()
     # validate(request.user)
     # replaceWithLongest(User.objects.all().get(username = "Genentech2"))
 
@@ -83,7 +83,9 @@ def userlogin(request):
         if user is not None:
             if user.is_active:
                 login(request, user)                    
-                return redirect('clinicaltrial:index')
+                # return redirect('clinicaltrial:index')
+                return redirect("clinicaltrial:userhome")
+
         return render(request, 'clinicaltrials/login.html') 
 
 def userlogout(request):
@@ -185,6 +187,7 @@ def model_form_upload(request):
 
         if form.is_valid():
             doc = form.save(commit=False)
+            doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
             
             #check for tampering of file if it was already in blockchain
             for person in User.objects.all():
@@ -204,7 +207,7 @@ def model_form_upload(request):
                 doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
                 doc.data.save(doc.filename, ContentFile(byt))
             else:
-                doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
+                # doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
                 doc.dataHash = hashString
 
             doc.sender = request.user
@@ -221,7 +224,9 @@ def model_form_upload(request):
             #add new block to everyone's ledger
             addToEveryonesLedger(b, request.user) 
 
-        return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+        # return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+        return redirect("clinicaltrial:userhome")
+
     
     else: #if request.method == 'GET':
         #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
@@ -259,7 +264,7 @@ def validate(user):
         recomputedHash = hash(str.encode(blocks[0].hashString + hash(blocks[1].fileReference.data.read())))
         if recomputedHash == blocks[1].hashString:
             return True, "Passed, this is a valid blockchain" 
-        return False, "block at index 2 has been falsified"    
+        return False, "Failed, block at index 2 has been falsified"    
     previousBlock = blocks[0]
     for b in blocks[1:]: #first block with file is blocks[1[]]
         # print("BBBBBB", b.index, b.fileReference.filename)
