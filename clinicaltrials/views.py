@@ -5,7 +5,7 @@ from django.template import loader
 from django.views import generic
 from django.views.generic import View
 from django.contrib.auth import authenticate, login, logout
-from .forms import UserForm, DocumentForm
+from .forms import UserForm, DocumentForm, LoginForm
 from django.utils.encoding import smart_str
 from django.contrib import messages
 import simplecrypt
@@ -37,13 +37,11 @@ def detail(request, clinicaltrial_id):
 class UserFormView(View):
     form_class = UserForm
     template_name = 'clinicaltrials/registration_form.html'
-    
     #display blank form 
     def get(self, request):
         form = self.form_class(None)
         return render(request, self.template_name, {'form' : form})
         pass
-
     #process form data
     def post(self,request):
         form = self.form_class(request.POST)
@@ -53,21 +51,15 @@ class UserFormView(View):
             password = form.cleaned_data['password']
             user.set_password(password)
             user.save()
-
             #return User objects if credentials are correct
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    
                     #initiate the new user's ledger
                     genesis = block(owner=user, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
                     genesis.save()
-
                     return redirect('clinicaltrial:index')
-
-           
-
         return render(request, self.template_name, {'form' :form})
 
 # Could write this like UserFormView.
@@ -87,6 +79,34 @@ def userlogin(request):
                 return redirect("clinicaltrial:userhome")
 
         return render(request, 'clinicaltrials/login.html') 
+
+# class UserLoginView(View):
+#     form_class = LoginForm
+#     template_name = 'clinicaltrials/login.html'
+#     #display blank form 
+#     def get(self, request):
+#         form = self.form_class(None)
+#         return render(request, self.template_name, {'form' : form})
+#         pass
+#     #process form data
+#     def post(self,request):
+#         form = self.form_class(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             password = form.cleaned_data['password']
+#             #return User objects if credentials are correct
+#             user = authenticate(username=username, password=password)
+#             if user is not None:
+#                 if user.is_active:
+#                     login(request, user)
+#                     return redirect("clinicaltrial:userhome")
+#         # return render(request, 'clinicaltrials/login.html')
+#         return render(request, self.template_name, {'form' :form})
+        
+
+
+
+
 
 def userlogout(request):
     logout(request)
@@ -189,7 +209,7 @@ def model_form_upload(request):
             doc = form.save(commit=False)
             doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
             
-            #check for tampering of file if it was already in blockchain
+            #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
             for person in User.objects.all():
                 if not person.is_superuser:
                     blocks = person.block_set.order_by('index')

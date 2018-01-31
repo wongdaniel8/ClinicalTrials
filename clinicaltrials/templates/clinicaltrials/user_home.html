@@ -63,7 +63,11 @@
 	            <td>{{block.fileReference.sender}}</td>
 	            <td>{{block.fileReference.owner}}</td>
 	            
-	            <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> 
+	            {% if user == block.fileReference.owner or user.is_superuser %}
+		            <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> 
+		            {% else %}
+		            <td>{{block.fileReference.filename}}</td>
+            	{% endif %}
 	            
 	            {% if block.fileReference.encrypted %}
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">

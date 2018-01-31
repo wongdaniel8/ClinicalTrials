@@ -16,6 +16,7 @@ url(r'^register$', views.UserFormView.as_view(), name = 'register'),
 
 #/clinicaltrials/login
 url(r'^login$', views.userlogin, name = 'login'),
+# url(r'^login$', views.UserLoginView.as_view(), name = 'login'),
 
 #/clinicaltrials/logout
 url(r'^logout$', views.userlogout, name = 'logout'),

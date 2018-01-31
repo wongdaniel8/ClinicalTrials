@@ -1,17 +1,17 @@
-
 {% extends 'clinicaltrials/base.html' %}
 {% block body %}
 
-
+<div id="login-form">
 <form action="{% url 'clinicaltrial:login' %}" method="post">
 	{% csrf_token %}
     <label for="username">username: </label>
     <input  type="text" name="name" value="">
     <br>
     <label for="input_password">password: </label>
-    <input  type="text" name="input_password" value="">
+    <input  type="password" name="input_password" value="">
     <br>
     <input type="submit" value="Login">
 </form>
-
+</div>
 {% endblock %}
+

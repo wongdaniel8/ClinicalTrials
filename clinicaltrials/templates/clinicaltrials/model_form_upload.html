@@ -1,11 +1,13 @@
 {% extends 'clinicaltrials/base.html' %}
 {% block body %}
 
+<div id="upload-form">
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
   <button type="submit">Upload</button>
 </form>
+</div>
 
 {% if messages %}
 <ul class="messages">
@@ -14,5 +16,6 @@
     {% endfor %}
 </ul>
 {% endif %}
+
 
 {% endblock %}
