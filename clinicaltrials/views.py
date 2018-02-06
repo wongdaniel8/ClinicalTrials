@@ -120,7 +120,7 @@ def userhome(request):
     ownedFiles = file.objects.all().filter(owner=request.user)
     blocks = request.user.block_set.order_by('index')
     validityMessage = validate(request.user)[1]
-    crossValidation = crossValidate(request.user)
+    crossValidation = crossValidate(request.user)[1]
     context = {"ownedFiles" : ownedFiles, "blocks" : blocks, "validityMessage": validityMessage, "crossValidation":crossValidation}
     return render(request, 'clinicaltrials/user_home.html', context)
 
@@ -195,62 +195,126 @@ def addToEveryonesLedger(input_block, broadcaster):
             newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString, timeStamp=input_block.timeStamp)
             newBlock.save()
 
+
 def model_form_upload(request):
+    """
+    original version with no file duplication
+    """
+    files = request.FILES.getlist('data')
     if request.method == 'POST':
-        #obtain hash string of the contents of the file here 
-        fileObject = request.FILES['data']
-        fileBytes = fileObject.read() #can only call read once on a file, else will return empty
-        print(".read() result", fileBytes)
-        hashString = hash(fileBytes)
-        print("hash String", hashString)
-        docName = request.FILES['data'].name
-        #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
-        for person in User.objects.all():
-            if not person.is_superuser:
-                blocks = person.block_set.order_by('index')
-                for b in blocks[1:]:
-                    if docName == b.fileReference.filename and hashString != b.fileReference.dataHash:
-                        messages.error(request, "Error:" + docName + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
-                        return render(request, 'clinicaltrials/model_form_upload.html', {'form': DocumentForm(request.POST, request.FILES)})
-        
-        for person in User.objects.all():    
+        for f in files:
             form = DocumentForm(request.POST, request.FILES)
-            if form.is_valid():
-                doc = form.save(commit=False)
-                doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-                
-                #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
-                if doc.encrypted:
-                    byt = returnEncrypted(fileBytes, doc.password) #will return bytes
-                    doc.dataHash = hash(byt)
-                    doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
-                    doc.data.save(doc.filename, ContentFile(byt))
-                else:
+            # fileObject = request.FILES['data'] #for singleton files
+            fileObject = f
+            with f.open() as g:
+                fileBytes = g.read()
+                print("RRRR", fileBytes)
+                hashString = hash(fileBytes)
+                print("init hash", hashString)
+            # fileBytes = fileObject.read() #can only call read once on a file, else will return empty
+            # print(".read() result", fileBytes)
+            # hashString = hash(fileBytes)
+            # print("init hash", hashString)
+                if form.is_valid():
+                    doc = form.save(commit=False)
+                    #new addition for multifile
+                    doc.data = f
                     # doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-                    doc.dataHash = hashString
-                doc.sender = request.user
-                # doc.dataHash = hashString
-                doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
-                           #not an issue except for when distributing files for download, the name will be annoying
-                           #blockchain only records filenames of what the user uploads, not internal media storage
-                #add to own ledger
-                lastBlock = person.block_set.order_by('index').last()
-                b = block(owner=person, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
-                b.save()
-                #add new block to everyone's ledger
-                # addToEveryonesLedger(b, request.user) 
+                    doc.filename = f.name
+                    #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
+                    for person in User.objects.all():
+                        if not person.is_superuser:
+                            blocks = person.block_set.order_by('index')
+                            for b in blocks[1:]:
+                                if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
+                                    messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
+                                    return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+                    
+                    #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
+                    if doc.encrypted:
+                        byt = returnEncrypted(fileBytes, doc.password) #will return bytes
+                        doc.dataHash = hash(byt)
+                        # doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
+                        doc.filename = doc.filename.replace(".txt","") + "_encrypted.txt"
+                        doc.data.save(doc.filename, ContentFile(byt))
+                    else:
+                        doc.dataHash = hashString
 
-        # return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+                    doc.sender = request.user
+                    doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
+                               #not an issue except for when distributing files for download, the name will be annoying
+                               #blockchain only records filenames of what the user uploads, not internal media storage
+                    #add to own ledger
+                    lastBlock = request.user.block_set.order_by('index').last()
+                    b = block(owner=request.user, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
+                    b.save()
+                    #add new block to everyone's ledger
+                    addToEveryonesLedger(b, request.user) 
+                # return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+                
         return redirect("clinicaltrial:userhome")
-
     
     else: #if request.method == 'GET':
         #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)})
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
+# def model_form_upload(request):
+#     """
+#     file duplication version
+#     """
+#     if request.method == 'POST':
+#         #obtain hash string of the contents of the file here 
+#         fileObject = request.FILES['data']
+#         fileBytes = fileObject.read() #can only call read once on a file, else will return empty
+#         print(".read() result", fileBytes)
+#         hashString = hash(fileBytes)
+#         print("hash String", hashString)
+#         docName = request.FILES['data'].name
+#         #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
+#         for person in User.objects.all():
+#             if not person.is_superuser:
+#                 blocks = person.block_set.order_by('index')
+#                 for b in blocks[1:]:
+#                     if docName == b.fileReference.filename and hashString != b.fileReference.dataHash:
+#                         messages.error(request, "Error:" + docName + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
+#                         return render(request, 'clinicaltrials/model_form_upload.html', {'form': DocumentForm(request.POST, request.FILES)})
+        
+#         for person in User.objects.all():    
+#             form = DocumentForm(request.POST, request.FILES)
+#             if form.is_valid():
+#                 doc = form.save(commit=False)
+#                 doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
+                
+#                 #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
+#                 if doc.encrypted:
+#                     byt = returnEncrypted(fileBytes, doc.password) #will return bytes
+#                     doc.dataHash = hash(byt)
+#                     doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
+#                     doc.data.save(doc.filename, ContentFile(byt))
+#                 else:
+#                     # doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
+#                     doc.dataHash = hashString
+#                 doc.sender = request.user
+#                 # doc.dataHash = hashString
+#                 doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
+#                            #not an issue except for when distributing files for download, the name will be annoying
+#                            #blockchain only records filenames of what the user uploads, not internal media storage
+#                 #add to own ledger
+#                 lastBlock = person.block_set.order_by('index').last()
+#                 b = block(owner=person, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
+#                 b.save()
+#                 #add new block to everyone's ledger
+#                 # addToEveryonesLedger(b, request.user) 
 
+#         # return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
+#         return redirect("clinicaltrial:userhome")
 
+    
+#     else: #if request.method == 'GET':
+#         #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
+#         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)})
+#         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 def initAllGenesis():
     """
@@ -284,8 +348,9 @@ def validate(user):
         return False, "Failed, block at index 2 has been falsified"    
     previousBlock = blocks[0]
     for b in blocks[1:]: #first block with file is blocks[1[]]
-        # print("BBBBBB", b.index, b.fileReference.filename)
+        # print("READ:", b.fileReference.data.read())
         recomputedHashCurrent = hash(b.fileReference.data.read())
+        print("AAAAAAA", recomputedHashCurrent, b.hashString)
         passing = (b.hashString == hash(str.encode(previousBlock.hashString + recomputedHashCurrent)))
         if not passing:
             print("Failed, invalid blockchain at block index " + str(b.index) + ", file: " + b.fileReference.filename)
@@ -298,8 +363,8 @@ def validate(user):
 
 def crossValidate(user):
     """
-    validates a user's blockchain by comparing it to everyone else's, returns True, [] if no conflicts
-    else returns False, [(user, first conflicting block), (...),]
+    validates a user's blockchain by comparing it to everyone else's, returns True, message if no conflicts
+    else returns False, failure message
     """
     conflicts = []
     passing = True
@@ -317,8 +382,11 @@ def crossValidate(user):
                     passing = False
                     conflicts.append((person, blocks[i].index))
     if passing:
-        return True, []
-    return False, conflicts            
+        return True, "Passed, there is no conflict with anyone in the network"
+    failMessage = "Failed, there exists conflicts with "
+    for i in range(0, len(conflicts)):
+        failMessage += conflicts[i][0].username + " at block index: " + str(conflicts[i][1]) + " "
+    return False, failMessage           
 
 def replaceWithLongest(user):
     """
@@ -353,13 +421,18 @@ def getConsensus():
 
 #centralized vs decentralized storage:
 # centralized:
-    # check if file upload conflicts with central ledger owned by FDA, encrypted and backed up with each new upload
+    #only 1 physical version of uploaded document exists, each node ledger is a copy of central FDA's, all stored on one database
+    #validation: check if file upload conflicts with central ledger owned by FDA, encrypted and backed up with each new upload
+    #pros: easier to write and manage, more power and control to FDA
+    #cons: security vulnerability with only one copy, but if backed up its ok
 
 #decentralized (democracy) distributed database:
-    #copy file for each user's blockchain ledger
-    # check if file upload conflicts with other node's ledgers, take majority vote
+    #copy/duplicate uploaded file for each user's blockchain ledger
+    #validation: check if file upload conflicts with other node's ledgers, take majority vote
         #if conflicts and passes then correct conflicted ledgers
         #if conflicts and fails then correct your own ledger and everyone else's you agreed with
+    #pros: more like bitcoin, resistant to damage to single file, more like democracy in that everyone has a vote to accept/reject transaction instead of relying on FDA ledger to accept/reject
+    #cons: more memory storage requirements (FDA has to maintain large database already, and each node has to maintain all files associated with trial on its own disk), also user has to install computer app to store and manage files locally
 
 
 #for production:
@@ -389,62 +462,13 @@ def getConsensus():
             #             return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
             #            # raise forms.ValidationError('File exists in blockchain already, and uploaded data is in conflict.')
      
-#ORIGINAL IMPLEMENTATION WITH NO FILE DUPLICATION       
-# def model_form_upload(request):
-#     if request.method == 'POST':
-#         form = DocumentForm(request.POST, request.FILES)
-
-#         #obtain hash string of the contents of the file here 
-#         fileObject = request.FILES['data']
-#         fileBytes = fileObject.read() #can only call read once on a file, else will return empty
-#         print(".read() result", fileBytes)
-#         hashString = hash(fileBytes)
-#         print("hash String", hashString)
-
-#         if form.is_valid():
-#             doc = form.save(commit=False)
-#             doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-            
-#             #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
-#             for person in User.objects.all():
-#                 if not person.is_superuser:
-#                     blocks = person.block_set.order_by('index')
-#                     for b in blocks[1:]:
-#                         print("BBBB", b.fileReference.filename, b.fileReference.data.read(), b.fileReference.dataHash)
-#                     for b in blocks[1:]:
-#                         if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
-#                             messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
-#                             return render(request, 'clinicaltrials/model_form_upload.html')
-            
-#             #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
-#             if doc.encrypted:
-#                 byt = returnEncrypted(fileBytes, doc.password) #will return bytes
-#                 doc.dataHash = hash(byt)
-#                 doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
-#                 doc.data.save(doc.filename, ContentFile(byt))
-#             else:
-#                 # doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-#                 doc.dataHash = hashString
-
-#             doc.sender = request.user
-#             # doc.dataHash = hashString
-#             doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
-#                        #not an issue except for when distributing files for download, the name will be annoying
-#                        #blockchain only records filenames of what the user uploads, not internal media storage
-#             #add to own ledger
-#             lastBlock = request.user.block_set.order_by('index').last()
-#             b = block(owner=request.user, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
-#             b.save()
-#             #add new block to everyone's ledger
-#             addToEveryonesLedger(b, request.user) 
-
-#         # return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
-#         return redirect("clinicaltrial:userhome")
-    
-#     else: #if request.method == 'GET':
-#         #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
-#         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)})
-#         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 
+# <!-- {% for file in ownedFiles %}  original implementation before file duplication for each user 
+#         <ul>
+#             <h3> {{file.filename}} uploaded: {{file.uploadDate}} from: {{file.sender}} </h3> 
+#             <a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
+#             <br>
+#         </ul>
+#     {% endfor %} -->
 

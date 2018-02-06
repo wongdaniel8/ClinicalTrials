@@ -28,6 +28,7 @@ class DocumentForm(forms.ModelForm):
     #         raise forms.ValidationError('Provide a password if encryption selected') #not raising for some reason
     #     return self.cleaned_data
    
+    data = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
     
     class Meta:
         model = file 

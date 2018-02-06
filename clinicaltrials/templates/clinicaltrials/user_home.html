@@ -1,8 +1,6 @@
 {% extends 'clinicaltrials/base.html' %}
 {% load staticfiles %}
-<!-- <link rel="stylesheet" type = "text/css" href="{% static 'clinicaltrials/style.css' %}"/> -->
 {% block body %}
-
 
 <!-- <div id="user-title"><h1> {{user}}'s Received Files</h1></div> -->
 <div id="user-title"><h2> Received Files</h2></div>
@@ -15,18 +13,9 @@
 	{% for block in blocks %}
 		{% if block.fileReference.owner == user %}
 			<h3> {{block.fileReference.filename}} uploaded: {{block.fileReference.uploadDate}} from: {{block.fileReference.sender}} </h3> 
-			<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
+			<a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> Download </a>
 		{% endif %}
 	{% endfor %}
-
-	<!-- {% for file in ownedFiles %}  original implementation before file duplication for each user 
-		<ul>
-			<h3> {{file.filename}} uploaded: {{file.uploadDate}} from: {{file.sender}} </h3> 
-			<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
-			<br>
-		</ul>
-	{% endfor %} -->
-
 {% endifequal %}
 
 <br>
@@ -37,8 +26,8 @@
 <!-- <h1> {{user}}'s Blockchain Ledger</h1> -->
 
 <div id="block-title"><h2>Blockchain Ledger</h2></div>
-<h4 id = "passing">{{validityMessage}}</h4>
-<h4 id = "crossValidate">{{crossValidation}}</h4>
+<h4 id = "passing">Validation: {{validityMessage}}</h4>
+<!-- <h4 id = "crossValidate">Cross Validation with Other Nodes: {{crossValidation}}</h4> -->
 
 <!-- <h3> validity: {{validity}} </h3> -->
 <!--Table--> 
@@ -74,16 +63,11 @@
 	            <td>{{block.timeStamp}}</td>
 	            <td>{{block.fileReference.sender}}</td>
 	            <td>{{block.fileReference.owner}}</td>
-	            
-
-	            <!-- <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> </td> -->
-	            
 	            {% if user == block.fileReference.owner or user.is_superuser %}
-		            <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> </td>
+		            <td> <a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> {{block.fileReference.filename}} </a> 
 		            {% else %}
-		            <td>{{block.fileReference.filename}}</td>
+		            <td>{{block.fileReference.filename}}
             	{% endif %}
-	            
 	            {% if block.fileReference.encrypted %}
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
 						{% csrf_token %}

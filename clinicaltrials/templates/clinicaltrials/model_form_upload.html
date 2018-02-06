@@ -17,5 +17,35 @@
 </ul>
 {% endif %}
 
+<br>
+<br>
+
+
+
+<!-- 
+{# 1. BUTTON TO TRIGGER THE ACTION #}
+<button type="button" class="btn btn-primary js-upload-photos">
+  <span class="glyphicon glyphicon-cloud-upload"></span> Upload photos
+</button>
+
+{# 2. FILE INPUT TO BE USED BY THE PLUG-IN #}
+<input id="fileupload" type="file" name="data" multiple
+       style="display: none;"
+       data-url="{% url 'clinicaltrial:upload' %}"
+       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>
+
+ -->
+
+
+<!-- <div id="ucsf-picture"></div> -->
+
+<div id="hospital-picture"></div>
+
+
+
+
+
+
+
 
 {% endblock %}

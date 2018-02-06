@@ -8,6 +8,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link rel="stylesheet" type = "text/css" href="{% static 'clinicaltrials/style.css' %}"/>
     <script type="text/javascript" src="{% static 'clinicaltrials/myscript.js' %}"></script>
+
+<!-- 
+  <script type="text/javascript" src="{% static 'clinicaltrials/js/jquery.fileupload.js' %}"></script>
+  <script type="text/javascript" src="{% static 'clinicaltrials/js/vendor/jquery.ui.widget.js' %}"></script>
+  <script type="text/javascript" src="{% static 'clinicaltrials/js/jquery.iframe-transport.js' %}"></script>
+
+ -->
+
+
 </head>
 <body>
 <nav class ="navbar navbar-default"> 
@@ -62,5 +71,11 @@
 </nav>
 {% block body %}
 {% endblock %}
+
+{% block javascript %}
+{% endblock %}
+
 </body>
 </html>
+
+
