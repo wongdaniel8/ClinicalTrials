@@ -13,7 +13,11 @@
 			<h4> {{block.fileReference.filename}} uploaded: {{block.fileReference.uploadDate}} from: {{block.fileReference.sender}} </h4> 
 			<a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> Download </a>
 			   {% if block.fileReference.encrypted %}
+			   		{% if '.pdf' in block.fileReference.filename %}
+	            	<form action="{% url 'clinicaltrial:decryptPDFdownload' block.fileReference.data.path  %}" method="post">
+	            	{% else %}
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
+            		{% endif %}
 						{% csrf_token %}
 						<input type="text" name="decryptpassword" value="">
 						<br>
@@ -67,7 +71,11 @@
 		            <td>{{block.fileReference.filename}}
             	{% endif %}
 	            {% if block.fileReference.encrypted %}
+	            	{% if '.pdf' in block.fileReference.filename %}
+	            	<form action="{% url 'clinicaltrial:decryptPDFdownload' block.fileReference.data.path  %}" method="post">
+	            	{% else %}
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
+	            	{% endif %}
 						{% csrf_token %}
 						<input type="text" name="decryptpassword" value="">
 						<br>

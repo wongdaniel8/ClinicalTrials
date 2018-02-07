@@ -166,6 +166,25 @@ def decryptdownload(request, path):
         trial = clinicaltrial.objects.get(pk = 2)
         return redirect("clinicaltrial:userhome")
 
+def decryptPDFdownload(request, path):
+    input_password = request.POST.get("decryptpassword","")
+    file_name = path[path.index("media/") + 6:] 
+    path_to_file = path[path.index("media"):] 
+    try:
+        save_path = "media/"
+        new_file_name = file_name.replace("_encrypted", "")
+        path_to_new_file = os.path.join(save_path, new_file_name)         
+        decrypt_pdf(path, "media/" + new_file_name, input_password)
+        response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
+        response['X-Sendfile'] = smart_str(path_to_new_file)
+        return response
+    except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
+        messages.error(request, "wrong passcode")        
+        trial = clinicaltrial.objects.get(pk = 2)
+        return redirect("clinicaltrial:userhome")    
+
+
 def hash(fileBytes):
     """
     input bytes, output String
@@ -202,14 +221,15 @@ def encryptPDF(inputfile, outputfile, userpass, ownerpass):
     outputStream.close()
     return open(outputfile, "rb") #returns buffered reader of encrypted content
 def decrypt_pdf(input_path, output_path, password):
-  with open(input_path, 'rb') as input_file, \
+    from PyPDF2 import PdfFileReader, PdfFileWriter
+    with open(input_path, 'rb') as input_file, \
     open(output_path, 'wb') as output_file:
-    reader = PdfFileReader(input_file)
-    reader.decrypt(password)
-    writer = PdfFileWriter()
-    for i in range(reader.getNumPages()):
-      writer.addPage(reader.getPage(i))
-    writer.write(output_file)
+        reader = PdfFileReader(input_file)
+        reader.decrypt(password)
+        writer = PdfFileWriter()
+        for i in range(reader.getNumPages()):
+          writer.addPage(reader.getPage(i))
+        writer.write(output_file)
 
 
 
@@ -366,7 +386,6 @@ def validate(user):
     """
     passing = True
     blocks = user.block_set.order_by('index')
-    print(blocks.count())
     if blocks.count() <= 1:
         print("Passed, this is a valid blockchain")
         return True, "Passed, this is a valid blockchain"
@@ -377,7 +396,6 @@ def validate(user):
         return False, "Failed, block at index 2 has been falsified"    
     previousBlock = blocks[0]
     for b in blocks[1:]: #first block with file is blocks[1[]]
-        # print("READ:", b.fileReference.data.read())
         recomputedHashCurrent = hash(b.fileReference.data.read())
         print("AAAAAAA", recomputedHashCurrent, b.hashString)
         passing = (b.hashString == hash(str.encode(previousBlock.hashString + recomputedHashCurrent)))

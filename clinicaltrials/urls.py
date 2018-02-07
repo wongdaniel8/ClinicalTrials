@@ -36,6 +36,7 @@ url(r'^upload$', views.model_form_upload, name = "upload"),
 url(r'^download/(?P<path>.*)$', views.download, name="download"),
 # url(r'^download/(?P<path>.*)/(?P<name>.*)$', views.download, name="download"),
 
+url(r'^decryptPDFdownload(?P<path>.*)$', views.decryptPDFdownload, name="decryptPDFdownload"),
 
 # url(r'^decryptdownload/(?P<path>.*)$'
 url(r'^decryptdownload(?P<path>.*)$', views.decryptdownload, name="decryptdownload")
