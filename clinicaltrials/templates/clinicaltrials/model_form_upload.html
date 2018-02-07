@@ -5,7 +5,7 @@
 <form method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Upload</button>
+  <button id="upload-button" class="btn btn-primary js-upload-photos" type="submit">Upload</button>
 </form>
 </div>
 

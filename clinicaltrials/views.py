@@ -143,8 +143,8 @@ def download(request, path):
 def decryptdownload(request, path):
     #path starts at root: /Users/student/Desktop/ButteLab/clinicalnetwork/media/{file}
     #current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
-    print("DDDDD", os.getcwd())
-    print("PPPP" ,path)
+    # print("DDDDD", os.getcwd())
+    # print("PPPP" ,path)
     input_password = request.POST.get("decryptpassword","")
     file_name = path[path.index("media/") + 6:] 
     path_to_file = path[path.index("media"):] 
@@ -152,7 +152,7 @@ def decryptdownload(request, path):
         with open(path_to_file, "rb") as f:
             decrypted = returnDecrypted(f.read(), input_password) #decrypted is a decoded string
         save_path = "media/"
-        new_file_name = file_name.replace(".txt","") + "_decrypted.txt"
+        new_file_name = file_name.replace("_encrypted", "")
         path_to_new_file = os.path.join(save_path, new_file_name)         
         f = open(path_to_new_file, "w")
         f.write(decrypted)
@@ -164,11 +164,7 @@ def decryptdownload(request, path):
     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
         messages.error(request, "wrong passcode")        
         trial = clinicaltrial.objects.get(pk = 2)
-        # return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': trial.file_set.all()})
-        # return redirect("clinicaltrial:index")
         return redirect("clinicaltrial:userhome")
-
-
 
 def hash(fileBytes):
     """
@@ -179,12 +175,42 @@ def hash(fileBytes):
     return hex_dig
 
 def returnEncrypted(fileBytes, password):
-    encrypted = simplecrypt.encrypt(password, fileBytes) #returns bytes
+    """
+    returns encoded bytes
+    """
+    encrypted = simplecrypt.encrypt(password, fileBytes)
     return encrypted 
 
 def returnDecrypted(fileBytes, password):
+    """
+    returns decoded string
+    """
     decrypted = simplecrypt.decrypt(password, fileBytes).decode('utf8')
     return decrypted    
+
+def encryptPDF(inputfile, outputfile, userpass, ownerpass):
+    import os
+    import PyPDF2
+    output = PyPDF2.PdfFileWriter()
+    input_stream = PyPDF2.PdfFileReader(inputfile.open())
+    for i in range(0, input_stream.getNumPages()):
+        output.addPage(input_stream.getPage(i))
+    outputfile = "media/encryptedPDFs/" + outputfile
+    outputStream = open(outputfile, "wb")
+    output.encrypt(userpass, ownerpass, use_128bit=True)
+    output.write(outputStream)
+    outputStream.close()
+    return open(outputfile, "rb") #returns buffered reader of encrypted content
+def decrypt_pdf(input_path, output_path, password):
+  with open(input_path, 'rb') as input_file, \
+    open(output_path, 'wb') as output_file:
+    reader = PdfFileReader(input_file)
+    reader.decrypt(password)
+    writer = PdfFileWriter()
+    for i in range(reader.getNumPages()):
+      writer.addPage(reader.getPage(i))
+    writer.write(output_file)
+
 
 
 def addToEveryonesLedger(input_block, broadcaster):
@@ -208,19 +234,13 @@ def model_form_upload(request):
             fileObject = f
             with f.open() as g:
                 fileBytes = g.read()
-                print("RRRR", fileBytes)
                 hashString = hash(fileBytes)
+                print("RRRR", fileBytes)
                 print("init hash", hashString)
-            # fileBytes = fileObject.read() #can only call read once on a file, else will return empty
-            # print(".read() result", fileBytes)
-            # hashString = hash(fileBytes)
-            # print("init hash", hashString)
                 if form.is_valid():
                     doc = form.save(commit=False)
-                    #new addition for multifile
-                    doc.data = f
-                    # doc.filename = request.FILES['data'].name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-                    doc.filename = f.name
+                    doc.data = f #new addition for multifile
+                    doc.filename = f.name #will default to whatever name the file has that the user uploads #filename = 'data'? 
                     #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
                     for person in User.objects.all():
                         if not person.is_superuser:
@@ -232,14 +252,25 @@ def model_form_upload(request):
                     
                     #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
                     if doc.encrypted:
-                        byt = returnEncrypted(fileBytes, doc.password) #will return bytes
-                        doc.dataHash = hash(byt)
-                        # doc.filename = request.FILES['data'].name.replace(".txt","") + "_encrypted.txt"
-                        doc.filename = doc.filename.replace(".txt","") + "_encrypted.txt"
-                        doc.data.save(doc.filename, ContentFile(byt))
+                        if ".pdf" in doc.filename:
+                            stream = encryptPDF(f, doc.filename.replace(".pdf", "_encrypted.pdf"), doc.password, doc.password)
+                            encryptedPDFContent = stream.read()
+                            doc.dataHash = hash(encryptedPDFContent)
+                            doc.filename = doc.filename.replace(".pdf", "_encrypted.pdf")
+                            doc.data.save(doc.filename, ContentFile(encryptedPDFContent))
+                        else:
+                            byt = returnEncrypted(fileBytes, doc.password) #will return bytes
+                            doc.dataHash = hash(byt)
+                            extension = doc.filename.rfind(".")
+                            #change filename
+                            if extension != -1:
+                                extension = doc.filename[extension:]
+                                doc.filename = doc.filename.replace(extension,"") + "_encrypted" + extension 
+                            else:
+                                doc.filename = doc.filename + "_encrypted"
+                            doc.data.save(doc.filename, ContentFile(byt))
                     else:
                         doc.dataHash = hashString
-
                     doc.sender = request.user
                     doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
                                #not an issue except for when distributing files for download, the name will be annoying
@@ -250,8 +281,6 @@ def model_form_upload(request):
                     b.save()
                     #add new block to everyone's ledger
                     addToEveryonesLedger(b, request.user) 
-                # return render(request, 'clinicaltrials/index.html', {'all_trials': clinicaltrial.objects.all() })
-                
         return redirect("clinicaltrial:userhome")
     
     else: #if request.method == 'GET':

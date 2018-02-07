@@ -29,7 +29,11 @@ body{
 	padding:5px;
 	text-align: center;
 }
-
+/*
+#upload-button {
+	background-color: #72ceff;
+}
+*/
 #upload-form {
 	margin-top:30px;
 }

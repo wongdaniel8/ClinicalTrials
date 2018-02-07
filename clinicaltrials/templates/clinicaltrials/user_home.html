@@ -5,15 +5,21 @@
 <!-- <div id="user-title"><h1> {{user}}'s Received Files</h1></div> -->
 <div id="user-title"><h2> Received Files</h2></div>
 <br>
-
-
 {% ifequal ownedFiles.count 0 %}
 	<h4> no files received</h4>
 {% else %}
 	{% for block in blocks %}
 		{% if block.fileReference.owner == user %}
-			<h3> {{block.fileReference.filename}} uploaded: {{block.fileReference.uploadDate}} from: {{block.fileReference.sender}} </h3> 
+			<h4> {{block.fileReference.filename}} uploaded: {{block.fileReference.uploadDate}} from: {{block.fileReference.sender}} </h4> 
 			<a href="{% url 'clinicaltrial:download' block.fileReference.data.path  %}"> Download </a>
+			   {% if block.fileReference.encrypted %}
+	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
+						{% csrf_token %}
+						<input type="text" name="decryptpassword" value="">
+						<br>
+						<input type="submit" value="download decrypted file">
+					</form>
+	            {% endif %}
 		{% endif %}
 	{% endfor %}
 {% endifequal %}
@@ -22,15 +28,9 @@
 <br>
 
 
-
-<!-- <h1> {{user}}'s Blockchain Ledger</h1> -->
-
 <div id="block-title"><h2>Blockchain Ledger</h2></div>
 <h4 id = "passing">Validation: {{validityMessage}}</h4>
 <!-- <h4 id = "crossValidate">Cross Validation with Other Nodes: {{crossValidation}}</h4> -->
-
-<!-- <h3> validity: {{validity}} </h3> -->
-<!--Table--> 
 <table class="table table-hover">
     <thead class="blue-grey lighten-4">
         <tr>
@@ -41,8 +41,6 @@
             <th>File</th>
             <th>Previous Block Hash</th>   
             <th>Block Hash</th>
-
-
         </tr>
     </thead>
     <tbody>
@@ -75,15 +73,12 @@
 						<br>
 						<input type="submit" value="download decrypted file">
 					</form>
-				
 	            {% endif %}
 				</td>
-
 	            <td>{{block.previousHash}}</td>
 	            <td>{{block.hashString}}</td>
 	        </tr>
     		{% endif %}
-
 		{% endfor %}
     </tbody>
 </table>
