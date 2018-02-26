@@ -38,6 +38,9 @@ url(r'^download/(?P<path>.*)$', views.download, name="download"),
 
 url(r'^decryptPDFdownload(?P<path>.*)$', views.decryptPDFdownload, name="decryptPDFdownload"),
 
+#/clinicaltrials/CRF
+url(r'^CRF$', views.CRF, name="CRF"),
+
 # url(r'^decryptdownload/(?P<path>.*)$'
 url(r'^decryptdownload(?P<path>.*)$', views.decryptdownload, name="decryptdownload")
 

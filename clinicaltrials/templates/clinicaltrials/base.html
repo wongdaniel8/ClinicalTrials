@@ -66,6 +66,14 @@
                 </li>
                 {% endif %}
 
+                 {% if user.username == "Clinician" %}
+                 <li class="active">
+                    <a href="{% url 'clinicaltrial:CRF' %}">
+                    <span class="glyphicon glyphicon-link" aria-hidden="true"></span>&nbsp; CRF
+                    </a>
+                </li>
+                {% endif %}
+
             </ul>
     </div>
 </nav>

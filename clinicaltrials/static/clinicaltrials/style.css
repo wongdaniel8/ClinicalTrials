@@ -34,6 +34,19 @@ body{
 	background-color: #72ceff;
 }
 */
+.decrypt-download-btn {
+	/*background: aliceblue;*/
+	border-radius:8px;
+}
+
+.decrypt-password {
+	border-radius:5px;
+	/*border-style: solid;*/
+	border-width: thin;
+	margin-bottom:3px;
+
+}
+
 #upload-form {
 	margin-top:30px;
 }

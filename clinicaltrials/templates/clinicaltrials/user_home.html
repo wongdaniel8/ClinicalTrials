@@ -19,9 +19,9 @@
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
             		{% endif %}
 						{% csrf_token %}
-						<input type="text" name="decryptpassword" value="">
+						<input class="decrypt-password" type="text" name="decryptpassword" value="">
 						<br>
-						<input type="submit" value="download decrypted file">
+						<input class="decrypt-download-btn" type="submit" value="download decrypted file">
 					</form>
 	            {% endif %}
 		{% endif %}
@@ -77,9 +77,9 @@
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
 	            	{% endif %}
 						{% csrf_token %}
-						<input type="text" name="decryptpassword" value="">
+						<input class="decrypt-password" type="text" name="decryptpassword" value="">
 						<br>
-						<input type="submit" value="download decrypted file">
+						<input class="decrypt-download-btn" type="submit" value="download decrypted file">
 					</form>
 	            {% endif %}
 				</td>

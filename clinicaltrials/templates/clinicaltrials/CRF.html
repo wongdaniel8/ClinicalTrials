@@ -1,0 +1,26 @@
+{% extends 'clinicaltrials/base.html' %}
+{% block body %}
+<h1>Case Report Form</h1>
+{% if user.username == "Clinician" %}
+	<div id="CRF-form">
+		<form action="{% url 'clinicaltrial:CRF' %}" method="post">
+			{% csrf_token %}
+			<table class="table table-hover">
+				<tbody>
+					{%for field in CRF_fields %}
+					<tr>
+					    <td><label for={{field}}>{{field}}</label></td>
+					    <td><input  type="text", name={{field}} value=""></td>
+					    <br>
+					</tr>
+					{% endfor %}
+			    </tbody>
+			</table>
+		<input type="submit" value="Submit">
+		</form>
+	</div>
+{% else %}
+You do not have authorization to submit a CRF for this trial
+{% endif %}
+{% endblock %}
+

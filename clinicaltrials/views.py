@@ -103,11 +103,6 @@ def userlogin(request):
 #         # return render(request, 'clinicaltrials/login.html')
 #         return render(request, self.template_name, {'form' :form})
 
-
-
-
-
-
 def userlogout(request):
     logout(request)
     all_trials = clinicaltrial.objects.all()
@@ -120,8 +115,8 @@ def userhome(request):
     ownedFiles = file.objects.all().filter(owner=request.user)
     blocks = request.user.block_set.order_by('index')
     validityMessage = validate(request.user)[1]
-    crossValidation = crossValidate(request.user)[1]
-    context = {"ownedFiles" : ownedFiles, "blocks" : blocks, "validityMessage": validityMessage, "crossValidation":crossValidation}
+    # crossValidation = crossValidate(request.user)[1]
+    context = {"ownedFiles" : ownedFiles, "blocks" : blocks, "validityMessage": validityMessage}
     return render(request, 'clinicaltrials/user_home.html', context)
 
 # def download(request, path, name):
@@ -129,7 +124,6 @@ def userhome(request):
 #     print("QQQQ", name)
 #     file_name = name
 #     path_to_file = path + "/" + file_name 
-
 def download(request, path):
     print("PPP", path)
     file_name = path[path.index("media/") + 6:]#hacky - django appends random string to filename if a file already exists in media with the same name 
@@ -220,6 +214,7 @@ def encryptPDF(inputfile, outputfile, userpass, ownerpass):
     output.write(outputStream)
     outputStream.close()
     return open(outputfile, "rb") #returns buffered reader of encrypted content
+
 def decrypt_pdf(input_path, output_path, password):
     from PyPDF2 import PdfFileReader, PdfFileWriter
     with open(input_path, 'rb') as input_file, \
@@ -231,8 +226,6 @@ def decrypt_pdf(input_path, output_path, password):
           writer.addPage(reader.getPage(i))
         writer.write(output_file)
 
-
-
 def addToEveryonesLedger(input_block, broadcaster):
     for person in User.objects.all():
         if person != broadcaster: #broadcaster already saved block
@@ -240,7 +233,6 @@ def addToEveryonesLedger(input_block, broadcaster):
             #copy into new block, but with different owner
             newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString, timeStamp=input_block.timeStamp)
             newBlock.save()
-
 
 def model_form_upload(request):
     """
@@ -250,13 +242,12 @@ def model_form_upload(request):
     if request.method == 'POST':
         for f in files:
             form = DocumentForm(request.POST, request.FILES)
-            # fileObject = request.FILES['data'] #for singleton files
             fileObject = f
             with f.open() as g:
                 fileBytes = g.read()
                 hashString = hash(fileBytes)
-                print("RRRR", fileBytes)
-                print("init hash", hashString)
+                print("bytes", fileBytes)
+                print("original hash", hashString)
                 if form.is_valid():
                     doc = form.save(commit=False)
                     doc.data = f #new addition for multifile
@@ -269,7 +260,6 @@ def model_form_upload(request):
                                 if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
                                     messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
                                     return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
-                    
                     #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
                     if doc.encrypted:
                         if ".pdf" in doc.filename:
@@ -292,9 +282,7 @@ def model_form_upload(request):
                     else:
                         doc.dataHash = hashString
                     doc.sender = request.user
-                    doc.save() #if file already exists in media database, django will append "_{random 7 chars}"
-                               #not an issue except for when distributing files for download, the name will be annoying
-                               #blockchain only records filenames of what the user uploads, not internal media storage
+                    doc.save() #if file already exists in media database, django will append "_{random 7 chars}" not an issue except for when distributing files for download, the name will be annoying, blockchain only records filenames of what the user uploads, not internal media storage
                     #add to own ledger
                     lastBlock = request.user.block_set.order_by('index').last()
                     b = block(owner=request.user, index = lastBlock.index + 1, fileReference=doc, previousHash=lastBlock.hashString, hashString = hash(str.encode(lastBlock.hashString + doc.dataHash)))
@@ -302,10 +290,8 @@ def model_form_upload(request):
                     #add new block to everyone's ledger
                     addToEveryonesLedger(b, request.user) 
         return redirect("clinicaltrial:userhome")
-    
     else: #if request.method == 'GET':
-        #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
-        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)})
+        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 # def model_form_upload(request):
@@ -397,14 +383,13 @@ def validate(user):
     previousBlock = blocks[0]
     for b in blocks[1:]: #first block with file is blocks[1[]]
         recomputedHashCurrent = hash(b.fileReference.data.read())
-        print("AAAAAAA", recomputedHashCurrent, b.hashString)
         passing = (b.hashString == hash(str.encode(previousBlock.hashString + recomputedHashCurrent)))
         if not passing:
             print("Failed, invalid blockchain at block index " + str(b.index) + ", file: " + b.fileReference.filename)
             return False, "Failed, invalid blockchain at block index " + str(b.index) + ", file: " + b.fileReference.filename
         previousBlock = b
     print("Passed, this is a valid blockchain")
-    print("cross validate", crossValidate(user))
+    # print("cross validate", crossValidate(user))
     return passing, "Passed, this is a valid blockchain"
 
 
@@ -419,7 +404,6 @@ def crossValidate(user):
     for person in User.objects.all():
         if person != user:
             blocks = person.block_set.order_by('index')
-            print(person, blocks)
             previousMyBlock = myBlocks[0]
             previousOtherBlock = blocks[0]
             for i in range(1, len(blocks)):
@@ -465,6 +449,23 @@ def getConsensus():
     get a universal blockchain that everyone agrees on???
     """
     return
+
+def CRF(request):
+    if request.method == "GET":
+        CRF_fields = ["patient_id", "date", "location"] #don't put spaces in field names 
+        context = {'CRF_fields': CRF_fields }
+        return render(request, 'clinicaltrials/CRF.html', context)
+    else:
+        
+        file = open("media/CRFexample" + request.POST.get("patient_id", "") + ".txt", "w")
+        for item in request.POST:
+            file.write(item + ": " + request.POST.get(item, "") + "\n")
+            print(item, request.POST.get(item, ""))
+        file.close()
+
+        return redirect("clinicaltrial:userhome")
+
+
 
 #centralized vs decentralized storage:
 # centralized:
