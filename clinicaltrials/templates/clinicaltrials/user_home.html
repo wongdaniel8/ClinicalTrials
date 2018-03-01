@@ -15,11 +15,9 @@
 
 			<a href="{% url 'clinicaltrial:download' path=block.fileReference.data.path name=block.fileReference.filename %}"> {{block.fileReference.filename}} </a> 
 			   {% if block.fileReference.encrypted %}
-			   		{% if '.pdf' in block.fileReference.filename %}
-	            	<form action="{% url 'clinicaltrial:decryptPDFdownload' block.fileReference.data.path %}" method="post">
-	            	{% else %}
+			   		
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
-            		{% endif %}
+            		
 						{% csrf_token %}
 						<input class="decrypt-password" type="text" name="decryptpassword" value="">
 						<br>
@@ -75,11 +73,9 @@
 		            <td>{{block.fileReference.filename}}
             	{% endif %}
 	            {% if block.fileReference.encrypted %}
-	            	{% if '.pdf' in block.fileReference.filename %}
-	            	<form action="{% url 'clinicaltrial:decryptPDFdownload' block.fileReference.data.path  %}" method="post">
-	            	{% else %}
+	            	
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
-	            	{% endif %}
+	            	
 						{% csrf_token %}
 						<input class="decrypt-password" type="text" name="decryptpassword" value="">
 						<br>

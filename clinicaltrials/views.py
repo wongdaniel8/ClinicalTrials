@@ -83,7 +83,6 @@ def userlogin(request):
                 return redirect("clinicaltrial:userhome")
 
         return render(request, 'clinicaltrials/login.html') 
-
 # class UserLoginView(View):
 #     form_class = LoginForm
 #     template_name = 'clinicaltrials/login.html'
@@ -177,7 +176,7 @@ def decryptdownload(request, path):
     #path starts at root: /Users/student/Desktop/ButteLab/clinicalnetwork/media/{file}
     #current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
     # print("DDDDD", os.getcwd())
-    # print("PPPP" ,path)
+    print("REACHED", "PPPP" ,path)
     input_password = request.POST.get("decryptpassword","")
     file_name = path[path.index("media/") + 6:] 
     path_to_file = path[path.index("media"):] 
@@ -187,7 +186,7 @@ def decryptdownload(request, path):
         save_path = "media/"
         new_file_name = file_name.replace("_encrypted", "")
         path_to_new_file = os.path.join(save_path, new_file_name)         
-        f = open(path_to_new_file, "w")
+        f = open(path_to_new_file, "wb")
         f.write(decrypted)
         f.close()
         response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
@@ -199,23 +198,23 @@ def decryptdownload(request, path):
         trial = clinicaltrial.objects.get(pk = 2)
         return redirect("clinicaltrial:userhome")
 
-def decryptPDFdownload(request, path):
-    input_password = request.POST.get("decryptpassword","")
-    file_name = path[path.index("media/") + 6:] 
-    path_to_file = path[path.index("media"):] 
-    try:
-        save_path = "media/"
-        new_file_name = file_name.replace("_encrypted", "")
-        path_to_new_file = os.path.join(save_path, new_file_name)         
-        decrypt_pdf(path, "media/" + new_file_name, input_password)
-        response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
-        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
-        response['X-Sendfile'] = smart_str(path_to_new_file)
-        return response
-    except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
-        messages.error(request, "wrong passcode")        
-        trial = clinicaltrial.objects.get(pk = 2)
-        return redirect("clinicaltrial:userhome")    
+# def decryptPDFdownload(request, path):
+#     input_password = request.POST.get("decryptpassword","")
+#     file_name = path[path.index("media/") + 6:] 
+#     path_to_file = path[path.index("media"):] 
+#     try:
+#         save_path = "media/"
+#         new_file_name = file_name.replace("_encrypted", "")
+#         path_to_new_file = os.path.join(save_path, new_file_name)         
+#         decrypt_pdf(path, "media/" + new_file_name, input_password)
+#         response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
+#         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
+#         response['X-Sendfile'] = smart_str(path_to_new_file)
+#         return response
+#     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
+#         messages.error(request, "wrong passcode")        
+#         trial = clinicaltrial.objects.get(pk = 2)
+#         return redirect("clinicaltrial:userhome")    
 
 
 def hash(fileBytes):
@@ -237,33 +236,33 @@ def returnDecrypted(fileBytes, password):
     """
     returns decoded string
     """
-    decrypted = simplecrypt.decrypt(password, fileBytes).decode('utf8')
+    decrypted = simplecrypt.decrypt(password, fileBytes)#.decode('utf8') #perhaps return decoded bytes to generalize?
     return decrypted    
 
-def encryptPDF(inputfile, outputfile, userpass, ownerpass):
-    import os
-    import PyPDF2
-    output = PyPDF2.PdfFileWriter()
-    input_stream = PyPDF2.PdfFileReader(inputfile.open())
-    for i in range(0, input_stream.getNumPages()):
-        output.addPage(input_stream.getPage(i))
-    outputfile = "media/encryptedPDFs/" + outputfile
-    outputStream = open(outputfile, "wb")
-    output.encrypt(userpass, ownerpass, use_128bit=True)
-    output.write(outputStream)
-    outputStream.close()
-    return open(outputfile, "rb") #returns buffered reader of encrypted content
+# def encryptPDF(inputfile, outputfile, userpass, ownerpass):
+#     import os
+#     import PyPDF2
+#     output = PyPDF2.PdfFileWriter()
+#     input_stream = PyPDF2.PdfFileReader(inputfile.open())
+#     for i in range(0, input_stream.getNumPages()):
+#         output.addPage(input_stream.getPage(i))
+#     outputfile = "media/encryptedPDFs/" + outputfile
+#     outputStream = open(outputfile, "wb")
+#     output.encrypt(userpass, ownerpass, use_128bit=True)
+#     output.write(outputStream)
+#     outputStream.close()
+#     return open(outputfile, "rb") #returns buffered reader of encrypted content
 
-def decrypt_pdf(input_path, output_path, password):
-    from PyPDF2 import PdfFileReader, PdfFileWriter
-    with open(input_path, 'rb') as input_file, \
-    open(output_path, 'wb') as output_file:
-        reader = PdfFileReader(input_file)
-        reader.decrypt(password)
-        writer = PdfFileWriter()
-        for i in range(reader.getNumPages()):
-          writer.addPage(reader.getPage(i))
-        writer.write(output_file)
+# def decrypt_pdf(input_path, output_path, password):
+#     from PyPDF2 import PdfFileReader, PdfFileWriter
+#     with open(input_path, 'rb') as input_file, \
+#     open(output_path, 'wb') as output_file:
+#         reader = PdfFileReader(input_file)
+#         reader.decrypt(password)
+#         writer = PdfFileWriter()
+#         for i in range(reader.getNumPages()):
+#           writer.addPage(reader.getPage(i))
+#         writer.write(output_file)
 
 def addToEveryonesLedger(input_block, broadcaster):
     for person in User.objects.all():
@@ -320,23 +319,23 @@ def model_form_upload(request):
 
                     #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
                     if doc.encrypted:
-                        if ".pdf" in doc.filename:
-                            stream = encryptPDF(f, doc.filename.replace(".pdf", "_encrypted.pdf"), doc.password, doc.password)
-                            encryptedPDFContent = stream.read()
-                            doc.dataHash = hash(encryptedPDFContent)
-                            doc.filename = doc.filename.replace(".pdf", "_encrypted.pdf")
-                            doc.data.save(doc.filename, ContentFile(encryptedPDFContent))
+                        # if ".pdf" in doc.filename:
+                        #     stream = encryptPDF(f, doc.filename.replace(".pdf", "_encrypted.pdf"), doc.password, doc.password)
+                        #     encryptedPDFContent = stream.read()
+                        #     doc.dataHash = hash(encryptedPDFContent)
+                        #     doc.filename = doc.filename.replace(".pdf", "_encrypted.pdf")
+                        #     doc.data.save(doc.filename, ContentFile(encryptedPDFContent))
+                        # else:
+                        byt = returnEncrypted(fileBytes, doc.password) #will return bytes
+                        doc.dataHash = hash(byt)
+                        extension = doc.filename.rfind(".")
+                        #change filename
+                        if extension != -1:
+                            extension = doc.filename[extension:]
+                            doc.filename = doc.filename.replace(extension,"") + "_encrypted" + extension 
                         else:
-                            byt = returnEncrypted(fileBytes, doc.password) #will return bytes
-                            doc.dataHash = hash(byt)
-                            extension = doc.filename.rfind(".")
-                            #change filename
-                            if extension != -1:
-                                extension = doc.filename[extension:]
-                                doc.filename = doc.filename.replace(extension,"") + "_encrypted" + extension 
-                            else:
-                                doc.filename = doc.filename + "_encrypted"
-                            doc.data.save(doc.filename, ContentFile(byt))
+                            doc.filename = doc.filename + "_encrypted"
+                        doc.data.save(doc.filename, ContentFile(byt))
                     else:
                         doc.dataHash = hashString
                     doc.sender = request.user
