@@ -6,34 +6,67 @@
 <h3> Creation date: {{trial.creationDate}}</h3>
 <br> <br>
 
-{% for file in allFiles %}
-	<ul>
-		<h4> {{file.sender}} sent {{file.filename}} to {{file.owner}} at {{file.uploadDate}}</h4>
-		<a href="{% url 'clinicaltrial:download' file.data.path %}"> Download </a>
-		<br>
-		{% if file.encrypted %}
-			<!-- <a href = "{% url 'clinicaltrial:decryptdownload' file.data.path %}"> Download Decrypted File </a> -->
-			<form action="{% url 'clinicaltrial:decryptdownload' file.data.path %}" method="post">
-				{% csrf_token %}
-				password: <input type="text" name="decryptpassword" value="">
-				<input type="submit" value="download decrypted file">
-			</form>
 
-			{% if messages %}
-			<ul class="messages">
-			    {% for message in messages %}
-			    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-			    {% endfor %}
-			</ul>
-			{% endif %}
+<div id="block-title"><h2>Blockchain Ledger</h2></div>
+<h4 id = "passing">Validation: {{validityMessage}}</h4>
 
-		{% endif %}
-
-		<br>
-	</ul>
-{% endfor %}
-
-
+<button> <a href="{% url 'clinicaltrial:downloadMultiple' %}"> Download full blockchain </a> </button>
+<!-- <h4 id = "crossValidate">Cross Validation with Other Nodes: {{crossValidation}}</h4> -->
+<table class="table table-hover">
+    <thead class="blue-grey lighten-4">
+        <tr>
+            <th>Block Index</th>
+            <th>Time Stamp</th>
+            <th>Sender</th>
+            <th>Receiver</th>
+            <th>File</th>
+            <th>Previous Block Hash</th>   
+            <th>Block Hash</th>
+        </tr>
+    </thead>
+    <tbody>
+    	{% for block in blocks %}
+    		{% if block.index == 1 %}
+    		<tr> 
+    			<th scope="row">{{block.index}}</th>
+	            <td>{{block.timeStamp}}</td>
+	            <td> -- </td>
+	            <td> -- </td>
+	            <td>genesis block</td>
+	            <td> -- </td>
+	            <td>{{block.hashString}}</td>
+    		</tr>
+    		{% else %}
+	        <tr>
+	            <th scope="row">{{block.index}}</th>
+	            <td>{{block.timeStamp}}</td>
+	            <td>{{block.fileReference.sender}}</td>
+	            <td>{{block.fileReference.owner}}</td>
+	            {% if user == block.fileReference.owner or user.is_superuser %}
+		            <td> <a href="{% url 'clinicaltrial:download' path=block.fileReference.data.path name=block.fileReference.filename %}"> {{block.fileReference.filename}} </a> 
+		            {% else %}
+		            <td>{{block.fileReference.filename}}
+            	{% endif %}
+	            {% if block.fileReference.encrypted %}
+	            	{% if '.pdf' in block.fileReference.filename %}
+	            	<form action="{% url 'clinicaltrial:decryptPDFdownload' block.fileReference.data.path  %}" method="post">
+	            	{% else %}
+	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
+	            	{% endif %}
+						{% csrf_token %}
+						<input class="decrypt-password" type="text" name="decryptpassword" value="">
+						<br>
+						<input class="decrypt-download-btn" type="submit" value="download decrypted file">
+					</form>
+	            {% endif %}
+				</td>
+	            <td>{{block.previousHash}}</td>
+	            <td>{{block.hashString}}</td>
+	        </tr>
+    		{% endif %}
+		{% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}
 
