@@ -29,6 +29,8 @@ class DocumentForm(forms.ModelForm):
     #     return self.cleaned_data
    
     data = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+
     
     class Meta:
         model = file 

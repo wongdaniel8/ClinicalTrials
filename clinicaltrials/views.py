@@ -176,7 +176,6 @@ def decryptdownload(request, path):
     #path starts at root: /Users/student/Desktop/ButteLab/clinicalnetwork/media/{file}
     #current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
     # print("DDDDD", os.getcwd())
-    print("REACHED", "PPPP" ,path)
     input_password = request.POST.get("decryptpassword","")
     file_name = path[path.index("media/") + 6:] 
     path_to_file = path[path.index("media"):] 
@@ -192,6 +191,7 @@ def decryptdownload(request, path):
         response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
         response['X-Sendfile'] = smart_str(path_to_new_file)
+        os.remove(path_to_new_file) #remove decrypted file from database because we don't want to leave this exposed
         return response
     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
         messages.error(request, "wrong passcode")        
@@ -275,6 +275,14 @@ def addToEveryonesLedger(input_block, broadcaster):
 def model_form_upload(request):
     """
     original version with no file duplication
+    method to handle file uploads
+    iterates over each file and will hash its contents, 
+    if encrypyted:
+         this method hashes the encrypted bytes to determine the hash string
+         _encrypted will be appended to the file's name before the extension
+    the filename in the storage database will be saved as the name of the file that the user uploads
+        if there is a duplicate in the database, django appends a random string to the name
+    a block is then constructed and added to everyone's ledger 
     """
     files = request.FILES.getlist('data')
     if request.method == 'POST':
@@ -290,32 +298,6 @@ def model_form_upload(request):
                     doc = form.save(commit=False)
                     doc.data = f #new addition for multifile
                     doc.filename = f.name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-
-
-
-                    #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
-                    highestVersion = 1
-                    # for person in User.objects.all():
-                        # if not person.is_superuser:
-                    person = User.objects.get(username="admin")
-                    blocks = person.block_set.order_by('index')
-                    for b in blocks[1:]:
-                        extension = doc.filename[doc.filename.rfind("."):]
-                        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
-                            highestVersion = 2
-                        elif '_version_' in b.fileReference.filename and doc.filename.replace(str(extension),"") == b.fileReference.filename[0:b.fileReference.filename.index("_version_")] and hashString != b.fileReference.dataHash:
-                            highestVersion = max(highestVersion, int(b.fileReference.filename[b.fileReference.filename.index("version_") + 8: b.fileReference.filename.rfind(extension)]))
-                    if highestVersion != 1:
-                        if extension != -1:
-                                doc.filename = doc.filename.replace(extension,"") + "_version_"  + str(highestVersion + 1) + extension
-                        else:
-                            doc.filename +=  "_version_" + str(highestVersion + 1)
-                                    # messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
-                                    # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
-                    f.name = doc.filename #change filename stored in media
-
-
-
 
                     #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
                     if doc.encrypted:
@@ -338,6 +320,32 @@ def model_form_upload(request):
                         doc.data.save(doc.filename, ContentFile(byt))
                     else:
                         doc.dataHash = hashString
+
+                    #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
+                    highestVersion = 1
+                    # for person in User.objects.all():
+                        # if not person.is_superuser:
+                    person = User.objects.get(username="admin")
+                    blocks = person.block_set.order_by('index')
+                    for b in blocks[1:]:
+                        print("QQQQ", doc.filename, b.fileReference.filename)
+                        extension = doc.filename[doc.filename.rfind("."):]
+                        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
+                            highestVersion = 1
+                        elif '_version_' in b.fileReference.filename and doc.filename.replace(str(extension),"") == b.fileReference.filename[0:b.fileReference.filename.index("_version_")] and hashString != b.fileReference.dataHash:
+                            highestVersion = max(highestVersion, int(b.fileReference.filename[b.fileReference.filename.index("version_") + 8: b.fileReference.filename.rfind(extension)]))
+                    if highestVersion != 1:
+                        if extension != -1:
+                                doc.filename = doc.filename.replace(extension,"") + "_version_"  + str(highestVersion + 1) + extension
+                        else:
+                            doc.filename +=  "_version_" + str(highestVersion + 1)
+                                    # messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
+                                    # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+                    f.name = doc.filename #change filename stored in media
+                    
+
+
+
                     doc.sender = request.user
                     doc.save() #if file already exists in media database, django will append "_{random 7 chars}" not an issue except for when distributing files for download, the name will be annoying, blockchain only records filenames of what the user uploads, not internal media storage
                     #add to own ledger
