@@ -5,12 +5,19 @@
 <!-- <div id="user-title"><h1> {{user}}'s Received Files</h1></div> -->
 <div id="user-title"><h2> Received Files</h2></div>
 
+{% if messages %}
+    {% for message in messages %}
+    <h4 id = "errorpass"> {{message}} </h4>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <br>
 {% ifequal ownedFiles.count 0 %}
 	<h4> no files received</h4>
 {% else %}
 	{% for block in blocks %}
-		{% if block.fileReference.owner == user %}
+		{% if block.fileReference.owner == user  %}
 			<h4> {{block.fileReference.filename}} uploaded: {{block.fileReference.uploadDate}} from: {{block.fileReference.sender}} </h4> 
 
 			<a href="{% url 'clinicaltrial:download' path=block.fileReference.data.path name=block.fileReference.filename %}"> {{block.fileReference.filename}} </a> 
@@ -67,7 +74,7 @@
 	            <td>{{block.timeStamp}}</td>
 	            <td>{{block.fileReference.sender}}</td>
 	            <td>{{block.fileReference.owner}}</td>
-	            {% if user == block.fileReference.owner or user.is_superuser %}
+	            {% if user == block.fileReference.owner or user.is_superuser or block.fileReference.sender == user %}
 		            <td> <a href="{% url 'clinicaltrial:download' path=block.fileReference.data.path name=block.fileReference.filename %}"> {{block.fileReference.filename}} </a> 
 		            {% else %}
 		            <td>{{block.fileReference.filename}}

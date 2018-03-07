@@ -1,0 +1,30 @@
+Subject: SUB73491
+verification code: 741be0d4c0
+
+Meta Information
+	race: Black or African American
+	gender: Male
+	age_reported: 28
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: -8', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -8', 'analyte: IgG-a Amb a', 'value_reported: 43', 'unit_reported: U/ml')
+	('study_time_collected: -8', 'analyte: Free IgE Concentration', 'value_reported: 89.92', 'unit_reported: ng/ml')
+	('study_time_collected: 105', 'analyte: IgG-a Amb a', 'value_reported: 511.5', 'unit_reported: U/ml')
+	('study_time_collected: 105', 'analyte: IgG-a Ragweed', 'value_reported: 385', 'unit_reported: ng/ml')
+	('study_time_collected: 105', 'analyte: Free IgE Concentration', 'value_reported: 17.376', 'unit_reported: ng/ml')
+	('study_time_collected: 202', 'analyte: IgG-a Ragweed', 'value_reported: 377', 'unit_reported: ng/ml')
+	('study_time_collected: 202', 'analyte: IgG-a Amb a', 'value_reported: 398', 'unit_reported: U/ml')
+	('study_time_collected: 202', 'analyte: Free IgE Concentration', 'value_reported: 34.303', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Sneezing
+	Insomnia
+	Injection site swelling
+	Skin laceration
+	Throat irritation
+	Nasal congestion
+	Sinus pain
+	Abrasion NOS
+	Sinus headache

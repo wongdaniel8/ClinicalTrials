@@ -14,6 +14,7 @@ import hashlib
 import os
 import zipfile
 import io
+import re
 # from os import StringIO
 from .models import clinicaltrial, file, block, User 
 
@@ -194,7 +195,7 @@ def decryptdownload(request, path):
         os.remove(path_to_new_file) #remove decrypted file from database because we don't want to leave this exposed
         return response
     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
-        messages.error(request, "wrong passcode")        
+        messages.error(request, "incorrect password")        
         trial = clinicaltrial.objects.get(pk = 2)
         return redirect("clinicaltrial:userhome")
 
@@ -301,17 +302,10 @@ def model_form_upload(request):
 
                     #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
                     if doc.encrypted:
-                        # if ".pdf" in doc.filename:
-                        #     stream = encryptPDF(f, doc.filename.replace(".pdf", "_encrypted.pdf"), doc.password, doc.password)
-                        #     encryptedPDFContent = stream.read()
-                        #     doc.dataHash = hash(encryptedPDFContent)
-                        #     doc.filename = doc.filename.replace(".pdf", "_encrypted.pdf")
-                        #     doc.data.save(doc.filename, ContentFile(encryptedPDFContent))
-                        # else:
                         byt = returnEncrypted(fileBytes, doc.password) #will return bytes
                         doc.dataHash = hash(byt)
                         extension = doc.filename.rfind(".")
-                        #change filename
+                        #change filename before extension 
                         if extension != -1:
                             extension = doc.filename[extension:]
                             doc.filename = doc.filename.replace(extension,"") + "_encrypted" + extension 
@@ -321,29 +315,45 @@ def model_form_upload(request):
                     else:
                         doc.dataHash = hashString
 
-                    #check for tampering of file if it was already in blockchain (just need one conflict to be invalid right now)
-                    highestVersion = 1
-                    # for person in User.objects.all():
-                        # if not person.is_superuser:
+
+                    #version control 
+                    #check for tampering of file if it was already in blockchain (just need one conflict) 
+                    #if so, change the name of the file to the appropriate version 
+                    highestVersion = 0
                     person = User.objects.get(username="admin")
                     blocks = person.block_set.order_by('index')
                     for b in blocks[1:]:
                         print("QQQQ", doc.filename, b.fileReference.filename)
                         extension = doc.filename[doc.filename.rfind("."):]
-                        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash:
+                        #if uploaded matches original one 
+                        if doc.filename == b.fileReference.filename and hashString == b.fileReference.dataHash:
+                            highestVersion = 0 
+                            break
+                        #if uploaded doesn't match original, edge case for first mismatch
+                        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash and highestVersion == 0:
                             highestVersion = 1
-                        elif '_version_' in b.fileReference.filename and doc.filename.replace(str(extension),"") == b.fileReference.filename[0:b.fileReference.filename.index("_version_")] and hashString != b.fileReference.dataHash:
-                            highestVersion = max(highestVersion, int(b.fileReference.filename[b.fileReference.filename.index("version_") + 8: b.fileReference.filename.rfind(extension)]))
-                    if highestVersion != 1:
+                        regexp = re.compile('\(v([\d]+)\).[A-Za-z0-9]+$') #matches (v#).extension
+                        if regexp.search(b.fileReference.filename):
+                            versionNum = regexp.search(b.fileReference.filename).group(1)
+                            index = regexp.search(b.fileReference.filename).start() #index in block's file's name of match
+                            #update the highestVersion number if a current block's file's version is greater
+                            if doc.filename.replace(str(extension),"") == b.fileReference.filename[0:index-1] and hashString != b.fileReference.dataHash:
+                                highestVersion = max(highestVersion, int(versionNum))
+                            #old version matched, keep version number 
+                            elif doc.filename.replace(str(extension),"") == b.fileReference.filename[0:index-1] and hashString == b.fileReference.dataHash:
+                                highestVersion = int(versionNum) - 1
+                                break
+                    if highestVersion != 0:
                         if extension != -1:
-                                doc.filename = doc.filename.replace(extension,"") + "_version_"  + str(highestVersion + 1) + extension
+                                doc.filename = doc.filename.replace(extension,"") + " (v" + str(highestVersion + 1) + ")" + extension
                         else:
-                            doc.filename +=  "_version_" + str(highestVersion + 1)
-                                    # messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
-                                    # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+                            doc.filename +=  " (v" + str(highestVersion + 1) + ")"
                     f.name = doc.filename #change filename stored in media
                     
 
+
+                                    # messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
+                                    # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 
                     doc.sender = request.user

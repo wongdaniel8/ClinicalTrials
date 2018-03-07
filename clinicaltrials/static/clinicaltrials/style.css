@@ -7,6 +7,10 @@ body{
 	color:green ;
 }
 
+#errorpass {
+	color: red;
+}
+
 .navbar-default {
 	margin-bottom: 0px;
 	/*margin-left: -20px*/
