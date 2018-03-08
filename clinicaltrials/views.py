@@ -372,9 +372,11 @@ def model_form_upload(request):
                     #add new block to everyone's ledger
                     addToEveryonesLedger(b, request.user) 
 
-                    # if "CRF" in doc.filename:
-                    #     print("CRF reached")
-                    #     extractAdverseEvents(f) 
+                    if "CRF" in doc.filename:
+                        print("CRF reached")
+                        adverseEvents = extractAdverseEvents(f) 
+                        updateAdverseEvents(clinicaltrial.objects.get(pk=2), adverseEvents)
+                        
 
         return redirect("clinicaltrial:userhome")
     if request.method == 'GET':
@@ -382,19 +384,44 @@ def model_form_upload(request):
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 
-# def extractAdverseEvents(file):
-#     adverseEvents = []
-#     file.open()
-#     beginParse = False
-#     for line in file.readlines():
-#         if "Adverse Reactions" in line:
-#             beginParse = True
-#             continue 
-#         if beginParse:
-#             adverseEvents.append(line.rstrip('\t').rstrip('\n'))
-#     print("EEE", adverseEvents)
-#     return adverseEvents
+def extractAdverseEvents(file):
+    adverseEvents = []
+    file.open()
+    beginParse = False
+    for line in file.readlines():
+        line = line.decode('utf-8')
+        print("LLL", line)
+        print(line.rstrip('\t'))
+        if "Adverse Reactions" in line:
+            beginParse = True
+            continue 
+        if beginParse:
+            line=line.rstrip('\t')
+            line=line.rstrip('\n')
 
+            adverseEvents.append(line)
+    print("EEE", adverseEvents)
+    return adverseEvents
+
+def updateAdverseEvents(trial, newAdverses):
+    trialAdverses = trial.adverseEvents
+    asList = trialAdverses.split("|")
+    for event in newAdverses:
+        print(len(event))
+        event = event[1:] #hackish to remove tabs, rstrip wasn't working...
+        if event not in asList:
+            asList.append(event)
+
+    asString = ""
+    for i in range(0,len(asList)):
+        if i == len(asList) - 1:
+            asString += str(asList[i])
+        else:
+            asString += str(asList[i]) + "|"
+    print(asString)
+    trial.adverseEvents = asString
+    trial.save()
+    return 
 
 
 
