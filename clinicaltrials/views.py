@@ -273,6 +273,47 @@ def addToEveryonesLedger(input_block, broadcaster):
             newBlock = block(owner=person, index = input_block.index, fileReference=input_block.fileReference, previousHash = lastBlock.hashString, hashString=input_block.hashString, timeStamp=input_block.timeStamp)
             newBlock.save()
 
+def versionControl(doc, hashString):
+    """
+    input doc is a form object, hashString is the hash string of the uploaded document 
+    returns desired filename of uploaded file in adherence to version control
+    method used in conjunction with model_form_upload
+    check for tampering of file if it was already in blockchain (just need one conflict) 
+    if so, return the name of the file of the appropriate version 
+    """
+    highestVersion = 0
+    person = User.objects.get(username="admin")
+    blocks = person.block_set.order_by('index')
+    for b in blocks[1:]:
+        print("QQQQ", doc.filename, b.fileReference.filename)
+        extension = doc.filename[doc.filename.rfind("."):]
+        #if uploaded matches original one 
+        if doc.filename == b.fileReference.filename and hashString == b.fileReference.dataHash:
+            highestVersion = 0 
+            break
+        #if uploaded doesn't match original, edge case for first mismatch
+        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash and highestVersion == 0:
+            highestVersion = 1
+        regexp = re.compile('\(v([\d]+)\).[A-Za-z0-9]+$') #matches (v#).extension
+        if regexp.search(b.fileReference.filename):
+            versionNum = regexp.search(b.fileReference.filename).group(1)
+            index = regexp.search(b.fileReference.filename).start() #index in block's file's name of match
+            #update the highestVersion number if a current block's file's version is greater
+            if doc.filename.replace(str(extension),"") == b.fileReference.filename[0:index-1] and hashString != b.fileReference.dataHash:
+                highestVersion = max(highestVersion, int(versionNum))
+            #old version matched, keep version number 
+            elif doc.filename.replace(str(extension),"") == b.fileReference.filename[0:index-1] and hashString == b.fileReference.dataHash:
+                highestVersion = int(versionNum) - 1
+                break
+    if highestVersion != 0:
+        if extension != -1:
+                return doc.filename.replace(extension,"") + " (v" + str(highestVersion + 1) + ")" + extension
+        else:
+            return " (v" + str(highestVersion + 1) + ")"
+    else:
+        return doc.filename
+
+
 def model_form_upload(request):
     """
     original version with no file duplication
@@ -314,47 +355,13 @@ def model_form_upload(request):
                         doc.data.save(doc.filename, ContentFile(byt))
                     else:
                         doc.dataHash = hashString
+                    
+                    doc.filename = versionControl(doc, hashString)
 
-
-                    #version control 
-                    #check for tampering of file if it was already in blockchain (just need one conflict) 
-                    #if so, change the name of the file to the appropriate version 
-                    highestVersion = 0
-                    person = User.objects.get(username="admin")
-                    blocks = person.block_set.order_by('index')
-                    for b in blocks[1:]:
-                        print("QQQQ", doc.filename, b.fileReference.filename)
-                        extension = doc.filename[doc.filename.rfind("."):]
-                        #if uploaded matches original one 
-                        if doc.filename == b.fileReference.filename and hashString == b.fileReference.dataHash:
-                            highestVersion = 0 
-                            break
-                        #if uploaded doesn't match original, edge case for first mismatch
-                        if doc.filename == b.fileReference.filename and hashString != b.fileReference.dataHash and highestVersion == 0:
-                            highestVersion = 1
-                        regexp = re.compile('\(v([\d]+)\).[A-Za-z0-9]+$') #matches (v#).extension
-                        if regexp.search(b.fileReference.filename):
-                            versionNum = regexp.search(b.fileReference.filename).group(1)
-                            index = regexp.search(b.fileReference.filename).start() #index in block's file's name of match
-                            #update the highestVersion number if a current block's file's version is greater
-                            if doc.filename.replace(str(extension),"") == b.fileReference.filename[0:index-1] and hashString != b.fileReference.dataHash:
-                                highestVersion = max(highestVersion, int(versionNum))
-                            #old version matched, keep version number 
-                            elif doc.filename.replace(str(extension),"") == b.fileReference.filename[0:index-1] and hashString == b.fileReference.dataHash:
-                                highestVersion = int(versionNum) - 1
-                                break
-                    if highestVersion != 0:
-                        if extension != -1:
-                                doc.filename = doc.filename.replace(extension,"") + " (v" + str(highestVersion + 1) + ")" + extension
-                        else:
-                            doc.filename +=  " (v" + str(highestVersion + 1) + ")"
                     f.name = doc.filename #change filename stored in media
                     
-
-
                                     # messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
                                     # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
-
 
                     doc.sender = request.user
                     doc.save() #if file already exists in media database, django will append "_{random 7 chars}" not an issue except for when distributing files for download, the name will be annoying, blockchain only records filenames of what the user uploads, not internal media storage
@@ -364,10 +371,31 @@ def model_form_upload(request):
                     b.save()
                     #add new block to everyone's ledger
                     addToEveryonesLedger(b, request.user) 
+
+                    # if "CRF" in doc.filename:
+                    #     print("CRF reached")
+                    #     extractAdverseEvents(f) 
+
         return redirect("clinicaltrial:userhome")
-    else: #if request.method == 'GET':
+    if request.method == 'GET':
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+
+
+# def extractAdverseEvents(file):
+#     adverseEvents = []
+#     file.open()
+#     beginParse = False
+#     for line in file.readlines():
+#         if "Adverse Reactions" in line:
+#             beginParse = True
+#             continue 
+#         if beginParse:
+#             adverseEvents.append(line.rstrip('\t').rstrip('\n'))
+#     print("EEE", adverseEvents)
+#     return adverseEvents
+
+
 
 
 def initAllGenesis():
@@ -471,17 +499,37 @@ def getConsensus():
 
 def CRF(request):
     if request.method == "GET":
-        CRF_fields = ["patient_id", "date", "location"] #don't put spaces in field names 
+        CRF_fields = ["subject_id", "race", "gender", "age_reported", "arm_accession", "assay_measurements", "adverse_events"] #don't put spaces in field names 
         context = {'CRF_fields': CRF_fields }
         return render(request, 'clinicaltrials/CRF.html', context)
     else:
-        
-        file = open("media/CRFexample" + request.POST.get("patient_id", "") + ".txt", "w")
-        for item in request.POST:
-            file.write(item + ": " + request.POST.get(item, "") + "\n")
-            print(item, request.POST.get(item, ""))
-        file.close()
+        subject = request.POST.get("subject_id","")
+        f = open("media/CRFexample" + subject + ".txt", "w")
+        f.write("Subject: " + subject + '\n')
+        hex_object = hashlib.sha256(subject.encode('utf-8'))
+        hex_dig = hex_object.hexdigest()
+        f.write("verification code: " + hex_dig[0:10] + '\n')
 
+        f.write('\n' + "Meta Information" + '\n')
+        for item in ["race", "gender", "age_reported", "arm_accession"]:
+            f.write('\t' + item + ": " + request.POST.get(item, "") + '\n')
+        f.write('\n' + "Assay Measurements"  + '\n')
+        f.write('\t' + request.POST.get("assay_measurements", "") + '\n')
+        f.write('\n' + "Adverse Events"  + '\n')
+        adverse = request.POST.get("adverse_events", "")
+        adverse = adverse.split(",")
+        for item in adverse:
+            f.write('\t' + item + '\n')
+
+       
+        f.close()
+
+
+        
+        # form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2), 'data': f}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
+        # request._mutable = True
+        # request.method = 'POST'
+        # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
         return redirect("clinicaltrial:userhome")
 
 

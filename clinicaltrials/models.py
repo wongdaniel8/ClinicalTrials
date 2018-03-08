@@ -8,6 +8,7 @@ class clinicaltrial(models.Model):
 	author = models.CharField(max_length = 300)
 	title = models.CharField(max_length = 300)
 	creationDate = models.DateTimeField(auto_now_add=True)
+	adverseEvents = models.TextField(blank=True, null=True)
 
 	def __str__(self):
 		return "Title: " + self.title + " -- Author: " + self.author

@@ -1,7 +1,7 @@
 {% extends 'clinicaltrials/base.html' %}
 {% block body %}
 <h1>Case Report Form</h1>
-{% if user.username == "Clinician" %}
+{% if user.username == "TrialInvestigator" %}
 	<div id="CRF-form">
 		<form action="{% url 'clinicaltrial:CRF' %}" method="post">
 			{% csrf_token %}
