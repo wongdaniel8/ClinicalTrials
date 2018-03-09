@@ -23,6 +23,9 @@ body{
 	padding:5px;
 	text-align: center;
 }
+#trial-title {
+	text-align: center;
+}
 
 #block-title {
 	background: #72ceff;

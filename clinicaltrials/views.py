@@ -16,7 +16,7 @@ import zipfile
 import io
 import re
 # from os import StringIO
-from .models import clinicaltrial, file, block, User 
+from .models import clinicaltrial, file, block, User, adverseEvent 
 
 def index(request):
 
@@ -35,9 +35,12 @@ def detail(request, clinicaltrial_id):
         # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) #why doesnt this work?
         allFiles = trial.file_set.all()
         blocks = request.user.block_set.order_by('index')
+        adverseEvents = trial.adverseEvents.split("|")
+        # adverseEvents = trial.adverseEvent_set.all()
+        adverseEvents = adverseEvent.objects.all() #HARD CODED, RETURN SET BELONGING TO TRIAL
     except:
         raise Http404("trial does not exist")
-    return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles,'blocks': blocks})
+    return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles,'blocks': blocks, 'adverseEvents': adverseEvents})
 
 class UserFormView(View):
     form_class = UserForm
@@ -374,8 +377,33 @@ def model_form_upload(request):
 
                     if "CRF" in doc.filename:
                         print("CRF reached")
-                        adverseEvents = extractAdverseEvents(f) 
-                        updateAdverseEvents(clinicaltrial.objects.get(pk=2), adverseEvents)
+                        
+
+                        regexp = re.compile('SUB([\d]+)')
+                        subject = regexp.search(doc.filename).group(1)
+                        print("SUBJECT", subject)
+                        aes = extractAdverseEvents(f)
+                        print("ADVERSES", aes)
+                        subjects = []
+                        for ae in adverseEvent.objects.all():
+                            subjects.append(ae.subject)
+                        if subject not in subjects:
+                            newAE = adverseEvent(subject=subject, events=convertToString(aes))
+                            newAE.trial = clinicaltrial.objects.get(pk=2) #HARD CODED
+
+                            newAE.save()
+                        else:
+                            ae = adverseEvent.objects.get(subject=subject)
+                            for event in aes:
+                                if event not in ae.events:
+                                    ae.events += "|" + event
+                            ae.trial = clinicaltrial.objects.get(pk=2) #HARD CODED
+                            ae.save()
+                                    
+
+
+                        # aes = extractAdverseEvents(f) 
+                        # updateAdverseEvents(clinicaltrial.objects.get(pk=2), aes, subject)
                         
 
         return redirect("clinicaltrial:userhome")
@@ -383,6 +411,15 @@ def model_form_upload(request):
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
+def convertToString(l):
+    asString = ""
+    for i in range(0,len(l)):
+        if i == len(l) - 1:
+            asString += str(l[i])
+        else:
+            asString += str(l[i]) + "|"
+    print("CONVERT TO STRING", asString)
+    return asString
 
 def extractAdverseEvents(file):
     adverseEvents = []
@@ -391,24 +428,23 @@ def extractAdverseEvents(file):
     for line in file.readlines():
         line = line.decode('utf-8')
         print("LLL", line)
-        print(line.rstrip('\t'))
         if "Adverse Reactions" in line:
             beginParse = True
             continue 
         if beginParse:
-            line=line.rstrip('\t')
+            # line=line.rstrip('\t')
             line=line.rstrip('\n')
-
+            line = line[1:] #hackish to remove tabs, rstrip wasn't working...
             adverseEvents.append(line)
     print("EEE", adverseEvents)
     return adverseEvents
 
-def updateAdverseEvents(trial, newAdverses):
+def updateAdverseEvents(trial, newAdverses, subject):
     trialAdverses = trial.adverseEvents
     asList = trialAdverses.split("|")
     for event in newAdverses:
         print(len(event))
-        event = event[1:] #hackish to remove tabs, rstrip wasn't working...
+        # event = event[1:] #hackish to remove tabs, rstrip wasn't working...
         if event not in asList:
             asList.append(event)
 
@@ -419,9 +455,9 @@ def updateAdverseEvents(trial, newAdverses):
         else:
             asString += str(asList[i]) + "|"
     print(asString)
-    trial.adverseEvents = asString
+    trial.adverseEvents = asString #SUB1:a1|a2%SUB2:a1|a2...
     trial.save()
-    return 
+    return asString
 
 
 

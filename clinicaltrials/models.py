@@ -13,6 +13,12 @@ class clinicaltrial(models.Model):
 	def __str__(self):
 		return "Title: " + self.title + " -- Author: " + self.author
 
+class adverseEvent(models.Model):
+	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)
+	subject = models.CharField(max_length = 10000)
+	events = models.TextField(blank=True, null=True)
+	def __str__(self):
+		return "SUB" + self.subject + ": " + self.events.replace("|", ", ")
 #to serve as a transaction
 class file(models.Model):
 	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)
