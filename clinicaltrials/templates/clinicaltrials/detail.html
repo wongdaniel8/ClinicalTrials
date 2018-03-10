@@ -4,17 +4,36 @@
 
 <div id = "trial-title"><h2> {{trial}} </h2>
 <h4> Creation date: {{trial.creationDate}}</h4></div>
-<h3> Reported Adverse Events</h3>
+<div class="title"> <h2> Reported Adverse Events</h2> </div>
+<!-- <h3> Reported Adverse Events</h3> -->
 <!-- <h5> {{adverseEvents}} </h5> -->
-{% for advent in adverseEvents %}
-	{{advent}}
+
+<!-- {% for advent in adverseEvents %}
+	<h5>{{advent}}</h5>
 	<br>
 {% endfor %}
-<br> <br>
+<br> <br> -->
+
+<table id="adverse-table" class="table table-hover">
+    <thead class="blue-grey lighten-4">
+    	 <tr>
+            <th>Subject</th>   
+            <th>Adverse Event</th>
+        </tr>
+    </thead>
+    <tbody>
+    	{% for advent in adverseEvents %} 
+    	<tr>
+    		<td > {{advent.subject}} </td>
+    		<td> {{advent.eventToString}} </td>
+    	</tr>
+    	{% endfor %}
+    </tbody>
+</table>
 
 
 
-<div id="block-title"><h2>Blockchain Ledger</h2></div>
+<div class="title"><h2>Blockchain Ledger</h2></div>
 <h4 id = "passing">Validation: {{validityMessage}}</h4>
 
 <button> <a href="{% url 'clinicaltrial:downloadMultiple' %}"> Download full blockchain </a> </button>

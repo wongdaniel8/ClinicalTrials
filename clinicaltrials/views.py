@@ -87,28 +87,6 @@ def userlogin(request):
                 return redirect("clinicaltrial:userhome")
 
         return render(request, 'clinicaltrials/login.html') 
-# class UserLoginView(View):
-#     form_class = LoginForm
-#     template_name = 'clinicaltrials/login.html'
-#     #display blank form 
-#     def get(self, request):
-#         form = self.form_class(None)
-#         return render(request, self.template_name, {'form' : form})
-#         pass
-#     #process form data
-#     def post(self,request):
-#         form = self.form_class(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             password = form.cleaned_data['password']
-#             #return User objects if credentials are correct
-#             user = authenticate(username=username, password=password)
-#             if user is not None:
-#                 if user.is_active:
-#                     login(request, user)
-#                     return redirect("clinicaltrial:userhome")
-#         # return render(request, 'clinicaltrials/login.html')
-#         return render(request, self.template_name, {'form' :form})
 
 def userlogout(request):
     logout(request)
@@ -202,25 +180,6 @@ def decryptdownload(request, path):
         trial = clinicaltrial.objects.get(pk = 2)
         return redirect("clinicaltrial:userhome")
 
-# def decryptPDFdownload(request, path):
-#     input_password = request.POST.get("decryptpassword","")
-#     file_name = path[path.index("media/") + 6:] 
-#     path_to_file = path[path.index("media"):] 
-#     try:
-#         save_path = "media/"
-#         new_file_name = file_name.replace("_encrypted", "")
-#         path_to_new_file = os.path.join(save_path, new_file_name)         
-#         decrypt_pdf(path, "media/" + new_file_name, input_password)
-#         response = HttpResponse(open(path_to_new_file, "rb"), content_type='application/force-download')
-#         response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(new_file_name)
-#         response['X-Sendfile'] = smart_str(path_to_new_file)
-#         return response
-#     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
-#         messages.error(request, "wrong passcode")        
-#         trial = clinicaltrial.objects.get(pk = 2)
-#         return redirect("clinicaltrial:userhome")    
-
-
 def hash(fileBytes):
     """
     input bytes, output String
@@ -242,31 +201,6 @@ def returnDecrypted(fileBytes, password):
     """
     decrypted = simplecrypt.decrypt(password, fileBytes)#.decode('utf8') #perhaps return decoded bytes to generalize?
     return decrypted    
-
-# def encryptPDF(inputfile, outputfile, userpass, ownerpass):
-#     import os
-#     import PyPDF2
-#     output = PyPDF2.PdfFileWriter()
-#     input_stream = PyPDF2.PdfFileReader(inputfile.open())
-#     for i in range(0, input_stream.getNumPages()):
-#         output.addPage(input_stream.getPage(i))
-#     outputfile = "media/encryptedPDFs/" + outputfile
-#     outputStream = open(outputfile, "wb")
-#     output.encrypt(userpass, ownerpass, use_128bit=True)
-#     output.write(outputStream)
-#     outputStream.close()
-#     return open(outputfile, "rb") #returns buffered reader of encrypted content
-
-# def decrypt_pdf(input_path, output_path, password):
-#     from PyPDF2 import PdfFileReader, PdfFileWriter
-#     with open(input_path, 'rb') as input_file, \
-#     open(output_path, 'wb') as output_file:
-#         reader = PdfFileReader(input_file)
-#         reader.decrypt(password)
-#         writer = PdfFileWriter()
-#         for i in range(reader.getNumPages()):
-#           writer.addPage(reader.getPage(i))
-#         writer.write(output_file)
 
 def addToEveryonesLedger(input_block, broadcaster):
     for person in User.objects.all():
@@ -376,31 +310,7 @@ def model_form_upload(request):
                     addToEveryonesLedger(b, request.user) 
 
                     if "CRF" in doc.filename:
-                        print("CRF reached")
-                        
-
-                        regexp = re.compile('SUB([\d]+)')
-                        subject = regexp.search(doc.filename).group(1)
-                        print("SUBJECT", subject)
-                        aes = extractAdverseEvents(f)
-                        print("ADVERSES", aes)
-                        subjects = []
-                        for ae in adverseEvent.objects.all():
-                            subjects.append(ae.subject)
-                        if subject not in subjects:
-                            newAE = adverseEvent(subject=subject, events=convertToString(aes))
-                            newAE.trial = clinicaltrial.objects.get(pk=2) #HARD CODED
-
-                            newAE.save()
-                        else:
-                            ae = adverseEvent.objects.get(subject=subject)
-                            for event in aes:
-                                if event not in ae.events:
-                                    ae.events += "|" + event
-                            ae.trial = clinicaltrial.objects.get(pk=2) #HARD CODED
-                            ae.save()
-                                    
-
+                        updateAdverses(doc, f)
 
                         # aes = extractAdverseEvents(f) 
                         # updateAdverseEvents(clinicaltrial.objects.get(pk=2), aes, subject)
@@ -411,23 +321,52 @@ def model_form_upload(request):
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
+def updateAdverses(doc, f):
+    """
+    input: form object doc, and django file object f
+    method to update adverse events section in home page of trial
+    constructs a new adverse event model instance if subject not included in current adverse event models
+    else will append adverse events if they're not present
+    """
+    regexp = re.compile('SUB([\d]+)')
+    subject = regexp.search(doc.filename).group(1)
+    aes = extractAdverseEvents(f)
+    subjects = [] #NOT MOST EFFICIENT WAY TO CHECK IF SUBJECT IN ADVERSE DATABASE - FIXME
+    for ae in adverseEvent.objects.all():
+        subjects.append(ae.subject)
+    if subject not in subjects:
+        newAE = adverseEvent(subject=subject, events=convertToString(aes))
+        newAE.clinicaltrial = clinicaltrial.objects.get(pk=2) #HARD CODED
+        newAE.save()
+    else:
+        ae = adverseEvent.objects.get(subject=subject)
+        for event in aes:
+            if event not in ae.events:
+                ae.events += "|" + event
+        ae.clinicaltrial = clinicaltrial.objects.get(pk=2) #HARD CODED
+        ae.save()
+
 def convertToString(l):
+    """
+    given a list of adverse events, returns them as a string seperated by a "|" delimeter
+    """
     asString = ""
     for i in range(0,len(l)):
         if i == len(l) - 1:
             asString += str(l[i])
         else:
             asString += str(l[i]) + "|"
-    print("CONVERT TO STRING", asString)
     return asString
 
 def extractAdverseEvents(file):
+    """
+    given a django file object, will parse out the adverse events and return these as a list
+    """
     adverseEvents = []
     file.open()
     beginParse = False
     for line in file.readlines():
         line = line.decode('utf-8')
-        print("LLL", line)
         if "Adverse Reactions" in line:
             beginParse = True
             continue 
@@ -436,30 +375,7 @@ def extractAdverseEvents(file):
             line=line.rstrip('\n')
             line = line[1:] #hackish to remove tabs, rstrip wasn't working...
             adverseEvents.append(line)
-    print("EEE", adverseEvents)
     return adverseEvents
-
-def updateAdverseEvents(trial, newAdverses, subject):
-    trialAdverses = trial.adverseEvents
-    asList = trialAdverses.split("|")
-    for event in newAdverses:
-        print(len(event))
-        # event = event[1:] #hackish to remove tabs, rstrip wasn't working...
-        if event not in asList:
-            asList.append(event)
-
-    asString = ""
-    for i in range(0,len(asList)):
-        if i == len(asList) - 1:
-            asString += str(asList[i])
-        else:
-            asString += str(asList[i]) + "|"
-    print(asString)
-    trial.adverseEvents = asString #SUB1:a1|a2%SUB2:a1|a2...
-    trial.save()
-    return asString
-
-
 
 def initAllGenesis():
     """

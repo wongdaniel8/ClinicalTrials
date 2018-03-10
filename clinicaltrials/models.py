@@ -8,10 +8,9 @@ class clinicaltrial(models.Model):
 	author = models.CharField(max_length = 300)
 	title = models.CharField(max_length = 300)
 	creationDate = models.DateTimeField(auto_now_add=True)
-	adverseEvents = models.TextField(blank=True, null=True)
 
 	def __str__(self):
-		return "Title: " + self.title + " -- Author: " + self.author
+		return self.title + " -- Author: " + self.author
 
 class adverseEvent(models.Model):
 	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)
@@ -19,6 +18,10 @@ class adverseEvent(models.Model):
 	events = models.TextField(blank=True, null=True)
 	def __str__(self):
 		return "SUB" + self.subject + ": " + self.events.replace("|", ", ")
+	def eventToString(self):
+		return self.events.replace("|", ", ")
+
+
 #to serve as a transaction
 class file(models.Model):
 	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)

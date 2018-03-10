@@ -16,31 +16,38 @@ body{
 	/*margin-left: -20px*/
 }
 
-#user-title{
+/*#user-title{
 	background: #72ceff;
 	color:white;
-	/*background: #0bb0ba; logo: #0bb0ba*/
 	padding:5px;
 	text-align: center;
 }
+*/
+.title {
+	background: #72ceff;
+	color:white;
+	padding:5px;
+	text-align: center;
+}
+
 #trial-title {
 	text-align: center;
 }
 
-#block-title {
+/*#block-title {
 	background: #72ceff;
 	color:white;
-	
-	/*background: #0bb0ba;*/
-
 	padding:5px;
 	text-align: center;
-}
+}*/
 /*
 #upload-button {
 	background-color: #72ceff;
 }
 */
+#adverse-table {
+	width:50%;
+}
 .decrypt-download-btn {
 	/*background: aliceblue;*/
 	border-radius:8px;

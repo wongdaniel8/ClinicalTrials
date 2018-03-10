@@ -3,7 +3,7 @@
 {% block body %}
 
 <!-- <div id="user-title"><h1> {{user}}'s Received Files</h1></div> -->
-<div id="user-title"><h2> Received Files</h2></div>
+<div class="title"><h2> Received Files</h2></div>
 
 {% if messages %}
     {% for message in messages %}
@@ -39,7 +39,7 @@
 <br>
 
 
-<div id="block-title"><h2>Blockchain Ledger</h2></div>
+<div class="title"><h2>Blockchain Ledger</h2></div>
 <h4 id = "passing">Validation: {{validityMessage}}</h4>
 
 <button> <a href="{% url 'clinicaltrial:downloadMultiple' %}"> Download full blockchain </a> </button>
