@@ -34,7 +34,8 @@ if settings.LOCAL_DEV:
 else:
     urlpatterns = [
         url('admin/', admin.site.urls),
-        url(r'^https://cryptic-garden-28398.herokuapp.com/clinicaltrials/', include('clinicaltrials.urls'))
+        url(r'^https://cryptic-garden-28398.herokuapp.com/clinicaltrials/', include('clinicaltrials.urls')),
+        url('', include('clinicaltrials.urls'))
     ]
 
     if settings.DEBUG == True:
