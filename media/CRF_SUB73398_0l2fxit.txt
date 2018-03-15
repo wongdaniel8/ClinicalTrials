@@ -1,0 +1,18 @@
+Subject: SUB73398
+verification code: dccba9575b
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 42
+	arm_accession: ARM1
+
+Assay Measurements
+	('study_time_collected: -14', 'analyte: Free IgE Concentration', 'value_reported: 54.746', 'unit_reported: ng/ml')
+	('study_time_collected: -14', 'analyte: IgG-a Amb a', 'value_reported: 60.2', 'unit_reported: U/ml')
+	('study_time_collected: -14', 'analyte: IgG-a Amb a', 'value_reported: 25', 'unit_reported: ng/ml')
+	('study_time_collected: -14', 'analyte: IgG-a Ragweed', 'value_reported: 2.6', 'unit_reported: mgA/L')
+	('study_time_collected: -14', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Pharyngitis

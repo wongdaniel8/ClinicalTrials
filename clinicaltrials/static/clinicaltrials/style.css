@@ -32,6 +32,9 @@ body{
 
 #trial-title {
 	text-align: center;
+	margin-top:60px;
+	margin-bottom:60px;
+	/*font-family: "Helvetica Nue", serif;*/
 }
 
 /*#block-title {
@@ -78,7 +81,7 @@ body{
 
 	background-size: 100% 100%;
 	/*background: url("ucsf_picture.jpg") no-repeat right bottom;*/
-    height: 700px;
+    height: 800px;
     max-height: 100%;
     max-width: 100%;
 }

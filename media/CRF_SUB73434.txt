@@ -1,0 +1,19 @@
+Subject: SUB73434
+verification code: 5709a3f262
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 29
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: -13', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -13', 'analyte: IgG-a Amb a', 'value_reported: 176.4', 'unit_reported: U/ml')
+	('study_time_collected: 120', 'analyte: IgG-a Amb a', 'value_reported: 1146.1', 'unit_reported: U/ml')
+	('study_time_collected: 120', 'analyte: IgG-a Ragweed', 'value_reported: 1111', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Pruritus
+	Nasal oedema
+	Injection site pruritus

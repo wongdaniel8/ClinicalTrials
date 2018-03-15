@@ -1,0 +1,15 @@
+Subject: SUB73427
+verification code: 37306a441c
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 23
+	arm_accession: ARM4
+
+Assay Measurements
+	('study_time_collected: -1', 'analyte: IgG-a Amb a', 'value_reported: 106', 'unit_reported: ng/ml')
+	('study_time_collected: -1', 'analyte: IgG-a Ragweed', 'value_reported: 2.1', 'unit_reported: mgA/L')
+
+Adverse Reactions
+	Rhinitis seasonal

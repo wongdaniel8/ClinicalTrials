@@ -1,0 +1,15 @@
+Subject: SUB73415
+verification code: 416774b578
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 41
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: 96', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Injection site erythema
+	Injection site reaction NOS

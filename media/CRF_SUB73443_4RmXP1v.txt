@@ -1,0 +1,24 @@
+Subject: SUB73443
+verification code: c6f35fe423
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 30
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: -8', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -8', 'analyte: Free IgE Concentration', 'value_reported: 67.508', 'unit_reported: ng/ml')
+	('study_time_collected: -8', 'analyte: IgG-a Amb a', 'value_reported: 170.7', 'unit_reported: U/ml')
+	('study_time_collected: 68', 'analyte: IgG-a Ragweed', 'value_reported: 217', 'unit_reported: ng/ml')
+	('study_time_collected: 68', 'analyte: Free IgE Concentration', 'value_reported: 58.467', 'unit_reported: ng/ml')
+	('study_time_collected: 68', 'analyte: IgG-a Amb a', 'value_reported: 360.8', 'unit_reported: U/ml')
+	('study_time_collected: 72', 'analyte: IgG-a Amb a', 'value_reported: 683.2', 'unit_reported: U/ml')
+	('study_time_collected: 72', 'analyte: IgG-a Ragweed', 'value_reported: 241', 'unit_reported: ng/ml')
+	('study_time_collected: 72', 'analyte: Free IgE Concentration', 'value_reported: 80.273', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Limb injury NOS
+	Nasal oedema
+	Nasal congestion

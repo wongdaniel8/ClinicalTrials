@@ -1,0 +1,16 @@
+Subject: SUB73453
+verification code: 94cf29946f
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 38
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: -7', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Ragweed', 'value_reported: 462', 'unit_reported: ng/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Amb a', 'value_reported: 273.7', 'unit_reported: U/ml')
+
+Adverse Reactions
+	Nasal oedema

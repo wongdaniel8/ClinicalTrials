@@ -2,8 +2,18 @@
 {% block body %}
 
 
-<div id = "trial-title"><h2> {{trial}} </h2>
-<h4> Creation date: {{trial.creationDate}}</h4></div>
+<div id = "trial-title">
+	<h2> {{trial}} </h2>
+	<h4> Creation date: {{trial.creationDate}}</h4>
+</div>
+
+<!-- {% if messages %}
+    {% for message in messages %}
+    <h4 id = "errorpass"> {{message}} </h4>
+    {% endfor %}
+</ul>
+{% endif %} -->
+
 <div class="title"> <h2> Reported Adverse Events</h2> </div>
 <!-- <h3> Reported Adverse Events</h3> -->
 <!-- <h5> {{adverseEvents}} </h5> -->

@@ -1,0 +1,15 @@
+Subject: SUB73368
+verification code: c26cc9cd2b
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 47
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: 98', 'analyte: IgG-a Ragweed', 'value_reported: 376', 'unit_reported: ng/ml')
+	('study_time_collected: 98', 'analyte: IgG-a Ragweed', 'value_reported: 639', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Injection site erythema

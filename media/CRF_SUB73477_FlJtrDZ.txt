@@ -1,0 +1,16 @@
+Subject: SUB73477
+verification code: 51b58a6ed0
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 39
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: -2', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -2', 'analyte: IgG-a Amb a', 'value_reported: 88.6', 'unit_reported: U/ml')
+
+Adverse Reactions
+	Nasal oedema
+	Tympanic membrane disorder NOS

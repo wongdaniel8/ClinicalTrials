@@ -1,0 +1,25 @@
+Subject: SUB73494
+verification code: 08d35aad0f
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 48
+	arm_accession: ARM4
+
+Assay Measurements
+	('study_time_collected: -7', 'analyte: IgG-a Amb a', 'value_reported: 147.3', 'unit_reported: U/ml')
+	('study_time_collected: -7', 'analyte: Free IgE Concentration', 'value_reported: 48.8', 'unit_reported: ng/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: 62', 'analyte: Free IgE Concentration', 'value_reported: 1.956', 'unit_reported: ng/ml')
+	('study_time_collected: 62', 'analyte: IgG-a Amb a', 'value_reported: 245.9', 'unit_reported: U/ml')
+	('study_time_collected: 62', 'analyte: IgG-a Ragweed', 'value_reported: 296', 'unit_reported: ng/ml')
+	('study_time_collected: 98', 'analyte: IgG-a Amb a', 'value_reported: 393.6', 'unit_reported: U/ml')
+	('study_time_collected: 98', 'analyte: IgG-a Ragweed', 'value_reported: 289', 'unit_reported: ng/ml')
+	('study_time_collected: 98', 'analyte: Free IgE Concentration', 'value_reported: 8.439', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Rash NOS
+	Neck pain
+	Injection site reaction NOS
+	Arthralgia

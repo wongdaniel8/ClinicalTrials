@@ -1,0 +1,20 @@
+Subject: SUB73437
+verification code: 7f35986711
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 28
+	arm_accession: ARM4
+
+Assay Measurements
+	('study_time_collected: -10', 'analyte: IgG-a Amb a', 'value_reported: 368', 'unit_reported: U/ml')
+	('study_time_collected: -10', 'analyte: IgG-a Ragweed', 'value_reported: 613', 'unit_reported: ng/ml')
+	('study_time_collected: 61', 'analyte: IgG-a Ragweed', 'value_reported: 597', 'unit_reported: ng/ml')
+	('study_time_collected: 61', 'analyte: IgG-a Amb a', 'value_reported: 392.4', 'unit_reported: U/ml')
+
+Adverse Reactions
+	Appetite increased NOS
+	Nasal congestion
+	Mood swings
+	Injection site pruritus

@@ -1,0 +1,16 @@
+Subject: SUB73466
+verification code: 32c4b37658
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 19
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: -14', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -14', 'analyte: IgG-a Amb a', 'value_reported: 295.3', 'unit_reported: U/ml')
+	('study_time_collected: -14', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Nasal oedema

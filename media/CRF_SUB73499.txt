@@ -1,0 +1,16 @@
+Subject: SUB73499
+verification code: 746cbd9e5e
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 24
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: 98', 'analyte: IgG-a Ragweed', 'value_reported: 1006', 'unit_reported: ng/ml')
+	('study_time_collected: 98', 'analyte: IgG-a Amb a', 'value_reported: 621.8', 'unit_reported: U/ml')
+	('study_time_collected: 98', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Injection site swelling

@@ -1,0 +1,20 @@
+Subject: SUB73440
+verification code: a209b9b86e
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 34
+	arm_accession: ARM1
+
+Assay Measurements
+	('study_time_collected: -3', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+	('study_time_collected: -3', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -3', 'analyte: IgG-a Amb a', 'value_reported: 92.6', 'unit_reported: U/ml')
+	('study_time_collected: 93', 'analyte: IgG-a Amb a', 'value_reported: 118.7', 'unit_reported: U/ml')
+	('study_time_collected: 93', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: 93', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Nasal turbinate hypertrophy
+	Toe traumatic amputation

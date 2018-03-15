@@ -1,0 +1,21 @@
+Subject: SUB73467
+verification code: 3016915043
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 33
+	arm_accession: ARM4
+
+Assay Measurements
+	('study_time_collected: -7', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Amb a', 'value_reported: 279.6', 'unit_reported: U/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Ragweed', 'value_reported: 299', 'unit_reported: ng/ml')
+	('study_time_collected: 102', 'analyte: Free IgE Concentration', 'value_reported: 25.449', 'unit_reported: ng/ml')
+	('study_time_collected: 102', 'analyte: IgG-a Amb a', 'value_reported: 4406.3', 'unit_reported: U/ml')
+	('study_time_collected: 102', 'analyte: IgG-a Ragweed', 'value_reported: 4005', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Pruritus
+	Pharyngeal erythema
+	Rhinitis NOS

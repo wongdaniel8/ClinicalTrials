@@ -1,0 +1,21 @@
+Subject: SUB73478
+verification code: 22f286cb86
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 26
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: -2', 'analyte: IgG-a Amb a', 'value_reported: 95.4', 'unit_reported: U/ml')
+	('study_time_collected: -2', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -2', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+	('study_time_collected: 65', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+	('study_time_collected: 65', 'analyte: IgG-a Amb a', 'value_reported: 159', 'unit_reported: U/ml')
+	('study_time_collected: 65', 'analyte: IgG-a Ragweed', 'value_reported: 239', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Headache
+	Nasal oedema
+	Nasal congestion

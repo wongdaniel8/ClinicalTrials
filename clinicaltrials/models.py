@@ -10,7 +10,7 @@ class clinicaltrial(models.Model):
 	creationDate = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
-		return self.title + " -- Author: " + self.author
+		return self.title
 
 class adverseEvent(models.Model):
 	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)

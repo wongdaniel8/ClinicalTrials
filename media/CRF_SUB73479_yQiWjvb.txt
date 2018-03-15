@@ -1,0 +1,15 @@
+Subject: SUB73479
+verification code: e6be0b2bb2
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 19
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: -1', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -1', 'analyte: IgG-a Amb a', 'value_reported: 88.2', 'unit_reported: U/ml')
+
+Adverse Reactions
+	Nasal oedema

@@ -1,0 +1,16 @@
+Subject: SUB73449
+verification code: 73ed59160a
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 29
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: -7', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -7', 'analyte: IgG-a Amb a', 'value_reported: 240.6', 'unit_reported: U/ml')
+
+Adverse Reactions
+	Pharyngeal disorder NOS

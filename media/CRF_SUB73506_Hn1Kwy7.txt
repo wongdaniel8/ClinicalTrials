@@ -1,0 +1,14 @@
+Subject: SUB73506
+verification code: aacd959ec7
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 28
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: 276', 'analyte: Free IgE Concentration', 'value_reported: 999999', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Injection site pain

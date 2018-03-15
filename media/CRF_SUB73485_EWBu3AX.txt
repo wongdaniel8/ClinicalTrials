@@ -1,0 +1,16 @@
+Subject: SUB73485
+verification code: ee46b1a7da
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 49
+	arm_accession: ARM2
+
+Assay Measurements
+	('study_time_collected: 75', 'analyte: Free IgE Concentration', 'value_reported: 61.786', 'unit_reported: ng/ml')
+	('study_time_collected: 75', 'analyte: IgG-a Amb a', 'value_reported: 78.8', 'unit_reported: U/ml')
+	('study_time_collected: 75', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Injection site reaction NOS

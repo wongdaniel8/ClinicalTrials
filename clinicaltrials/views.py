@@ -1,6 +1,10 @@
+"""
+@author Daniel Wong
+logic for most of the application
+"""
 from django.shortcuts import render, redirect
 from django.http import Http404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.views import generic
 from django.views.generic import View
@@ -15,27 +19,26 @@ import os
 import zipfile
 import io
 import re
-# from os import StringIO
 from .models import clinicaltrial, file, block, User, adverseEvent 
 
 def index(request):
-
-    # initAllGenesis()
-    # validate(request.user)
-    # replaceWithLongest(User.objects.all().get(username = "Genentech2"))
-
-
+    """
+    home page to list all clinical trials
+    """
     all_trials = clinicaltrial.objects.all()
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
 
 def detail(request, clinicaltrial_id):
+    """
+    specific page of a clinical trial
+    """
     try:
         trial = clinicaltrial.objects.get(pk = clinicaltrial_id)
         # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) #why doesnt this work?
         allFiles = trial.file_set.all()
         blocks = request.user.block_set.order_by('index')
-        adverseEvents = trial.adverseEvents.split("|")
+        # adverseEvents = trial.adverseEvents.split("|")
         # adverseEvents = trial.adverseEvent_set.all()
         adverseEvents = adverseEvent.objects.all() #HARD CODED, RETURN SET BELONGING TO TRIAL
     except:
@@ -107,14 +110,8 @@ def userhome(request):
 def download(request, path, name):
     print("PPP", path)
     print("QQQQ", name)
-#     file_name = name
-#     path_to_file = path + "/" + file_name 
-
-# def download(request, path):
     file_name = name
-    # file_name = path[path.index("media/") + 6:]#hacky - django appends random string to filename if a file already exists in media with the same name 
     path_to_file = path[path.index("media"):] #get the path of desired file, current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
-    
     response = HttpResponse(open(path_to_file, "rb"), content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
     response['X-Sendfile'] = smart_str(path_to_file)
@@ -157,7 +154,6 @@ def downloadMultiple(request):
 def decryptdownload(request, path):
     #path starts at root: /Users/student/Desktop/ButteLab/clinicalnetwork/media/{file}
     #current directory: /Users/student/Desktop/ButteLab/clinicalnetwork
-    # print("DDDDD", os.getcwd())
     input_password = request.POST.get("decryptpassword","")
     file_name = path[path.index("media/") + 6:] 
     path_to_file = path[path.index("media"):] 
@@ -178,7 +174,8 @@ def decryptdownload(request, path):
     except: #return to same page, HARDCODED TO RETURN TO TRIAL 2
         messages.error(request, "incorrect password")        
         trial = clinicaltrial.objects.get(pk = 2)
-        return redirect("clinicaltrial:userhome")
+        # return redirect("clinicaltrial:userhome")
+        return redirect("clinicaltrial:detail", 2) #HARDCODED
 
 def hash(fileBytes):
     """
@@ -271,13 +268,10 @@ def model_form_upload(request):
             with f.open() as g:
                 fileBytes = g.read()
                 hashString = hash(fileBytes)
-                print("bytes", fileBytes)
-                print("original hash", hashString)
                 if form.is_valid():
                     doc = form.save(commit=False)
                     doc.data = f #new addition for multifile
                     doc.filename = f.name #will default to whatever name the file has that the user uploads #filename = 'data'? 
-
                     #if encrypted is set to True, change the contents of the file to the encrypted bytes, also set hash of data to hash of encrypted bytes
                     if doc.encrypted:
                         byt = returnEncrypted(fileBytes, doc.password) #will return bytes
@@ -296,7 +290,6 @@ def model_form_upload(request):
                     doc.filename = versionControl(doc, hashString)
 
                     f.name = doc.filename #change filename stored in media
-                    
                                     # messages.error(request, "Error:" + doc.filename + " already exists in the blockchain and the contents of the data are in conflict. Either resolve the conflict or change the filename to avoid discrepancy.")
                                     # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
@@ -312,11 +305,10 @@ def model_form_upload(request):
                     if "CRF" in doc.filename:
                         updateAdverses(doc, f)
 
-                        # aes = extractAdverseEvents(f) 
-                        # updateAdverseEvents(clinicaltrial.objects.get(pk=2), aes, subject)
-                        
+        # return redirect("clinicaltrial:userhome")
+        return redirect("clinicaltrial:detail", 2) #HARDCODED
 
-        return redirect("clinicaltrial:userhome")
+
     if request.method == 'GET':
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
@@ -383,11 +375,9 @@ def initAllGenesis():
     """
     blocks = block.objects.all()
     blocks.delete()
-
     for person in User.objects.all():
         genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
         genesis.save()
-
     files = file.objects.all()
     files.delete()
 
@@ -477,6 +467,10 @@ def getConsensus():
     return
 
 def CRF(request):
+    """
+    form to process a manually entered CRF, saves the entry as a .txt file in database
+    need to still implement processing this on the blockchain
+    """
     if request.method == "GET":
         CRF_fields = ["subject_id", "race", "gender", "age_reported", "arm_accession", "assay_measurements", "adverse_events"] #don't put spaces in field names 
         context = {'CRF_fields': CRF_fields }
@@ -499,12 +493,7 @@ def CRF(request):
         adverse = adverse.split(",")
         for item in adverse:
             f.write('\t' + item + '\n')
-
-       
         f.close()
-
-
-        
         # form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2), 'data': f}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
         # request._mutable = True
         # request.method = 'POST'

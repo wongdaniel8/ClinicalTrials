@@ -1,0 +1,16 @@
+Subject: SUB73502
+verification code: 12380e3539
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 42
+	arm_accession: ARM1
+
+Assay Measurements
+	('study_time_collected: 98', 'analyte: IgG-a Ragweed', 'value_reported: 845', 'unit_reported: ng/ml')
+	('study_time_collected: 98', 'analyte: IgG-a Amb a', 'value_reported: 180.8', 'unit_reported: U/ml')
+	('study_time_collected: 98', 'analyte: Free IgE Concentration', 'value_reported: 43.95', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Pruritus

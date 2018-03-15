@@ -1,0 +1,14 @@
+Subject: SUB73385
+verification code: 09beca5af5
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 42
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: 98', 'analyte: Free IgE Concentration', 'value_reported: 2.108', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Injection site erythema

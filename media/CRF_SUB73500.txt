@@ -1,0 +1,20 @@
+Subject: SUB73500
+verification code: ca55527563
+
+Meta Information
+	race: White
+	gender: Female
+	age_reported: 34
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: -8', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+	('study_time_collected: -8', 'analyte: Free IgE Concentration', 'value_reported: 136.595', 'unit_reported: ng/ml')
+	('study_time_collected: -8', 'analyte: IgG-a Amb a', 'value_reported: 86.2', 'unit_reported: U/ml')
+	('study_time_collected: 196', 'analyte: IgG-a Amb a', 'value_reported: 144.4', 'unit_reported: U/ml')
+	('study_time_collected: 196', 'analyte: Free IgE Concentration', 'value_reported: 15.886', 'unit_reported: ng/ml')
+	('study_time_collected: 196', 'analyte: IgG-a Ragweed', 'value_reported: 329', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Skin chapped
+	Injection site discomfort

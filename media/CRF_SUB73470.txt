@@ -1,0 +1,18 @@
+Subject: SUB73470
+verification code: ba21113428
+
+Meta Information
+	race: White
+	gender: Male
+	age_reported: 23
+	arm_accession: ARM3
+
+Assay Measurements
+	('study_time_collected: -14', 'analyte: Free IgE Concentration', 'value_reported: 64.11', 'unit_reported: ng/ml')
+	('study_time_collected: -14', 'analyte: IgG-a Amb a', 'value_reported: 119.9', 'unit_reported: U/ml')
+	('study_time_collected: -14', 'analyte: IgG-a Ragweed', 'value_reported: 100', 'unit_reported: ng/ml')
+
+Adverse Reactions
+	Nasal oedema
+	Rhinitis NOS
+	Nasal congestion
