@@ -25,7 +25,7 @@ SECRET_KEY = '1)$pu@4%kh&@8eud9x(b$$s_-e%=w(pfr#znc1z7=wuhf+suz('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['cryptic-garden-28398.herokuapp.com']
 
 
 # Application definition
