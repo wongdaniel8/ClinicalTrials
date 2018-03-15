@@ -9,6 +9,7 @@ name = "pypi"
 
 gunicorn = "*"
 django-heroku = "*"
+simple-crypt = "*"
 
 
 [dev-packages]

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f4b5122dd4056548ef479e3a4254025dd831586904e3ff58062a243e2a9432f6"
+            "sha256": "c4a35e6d3657c46c564db0b4fdf76ca2a71b3c4b1eb836e309371f3f2e5a22e8"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -78,6 +78,12 @@
             ],
             "version": "==2.7.4"
         },
+        "pycrypto": {
+            "hashes": [
+                "sha256:f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c"
+            ],
+            "version": "==2.6.1"
+        },
         "pytz": {
             "hashes": [
                 "sha256:07edfc3d4d2705a20a6e99d97f0c4b61c800b8232dc1c04d87e8554f130148dd",
@@ -91,6 +97,13 @@
                 "sha256:f93ddcdd6342f94cea379c73cddb5724e0d6d0a1c91c9bdef364dc0368ba4fda"
             ],
             "version": "==2018.3"
+        },
+        "simple-crypt": {
+            "hashes": [
+                "sha256:49462ab7ea4b080a8c10e362abfe35ecfa6dbe1e1c454ea36de7d2a71dce992f"
+            ],
+            "index": "pypi",
+            "version": "==4.1.7"
         },
         "whitenoise": {
             "hashes": [
