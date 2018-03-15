@@ -19,13 +19,29 @@ from django.conf.urls import include, url
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
-    url('admin/', admin.site.urls),
-    url(r'^clinicaltrials/', include('clinicaltrials.urls'))
-]
 
-if settings.DEBUG == True:
-	urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+if settings.LOCAL_DEV:
+    urlpatterns = [
+        url('admin/', admin.site.urls),
+        url(r'^clinicaltrials/', include('clinicaltrials.urls'))
+    ]
 
-	urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+    if settings.DEBUG == True:
+    	urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+
+    	urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+
+else:
+    urlpatterns = [
+        url('admin/', admin.site.urls),
+        url(r'^https://cryptic-garden-28398.herokuapp.com/clinicaltrials/', include('clinicaltrials.urls'))
+    ]
+
+    if settings.DEBUG == True:
+        urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+
+        urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)    
+
+
+
 
