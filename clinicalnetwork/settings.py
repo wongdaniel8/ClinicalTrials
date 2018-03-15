@@ -126,6 +126,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+# Configure Django App for Heroku.
+# import django_heroku
+# django_heroku.settings(locals())
+
+# PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+# STATICFILES_DIRS = (
+#     os.path.join(PROJECT_ROOT, 'static'),
+# )
+
+# STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 
 

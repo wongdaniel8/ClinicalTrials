@@ -12,8 +12,9 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import UserForm, DocumentForm, LoginForm
 from django.utils.encoding import smart_str
 from django.contrib import messages
-import simplecrypt
 from django.core.files.base import ContentFile
+
+import simplecrypt
 import hashlib
 import os
 import zipfile
