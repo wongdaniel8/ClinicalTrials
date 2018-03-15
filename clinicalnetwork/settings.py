@@ -25,7 +25,7 @@ SECRET_KEY = '1)$pu@4%kh&@8eud9x(b$$s_-e%=w(pfr#znc1z7=wuhf+suz('
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cryptic-garden-28398.herokuapp.com']
+ALLOWED_HOSTS = ['cryptic-garden-28398.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -127,8 +127,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # Configure Django App for Heroku.
-# import django_heroku
-# django_heroku.settings(locals())
+import django_heroku
+django_heroku.settings(locals())
 
 # PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
