@@ -26,9 +26,13 @@ def index(request):
     """
     home page to list all clinical trials
     """
-    initAllGenesis()
-    
-    
+
+    for person in User.objects.all():
+        genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
+        genesis.save()
+
+
+
     all_trials = clinicaltrial.objects.all()
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
