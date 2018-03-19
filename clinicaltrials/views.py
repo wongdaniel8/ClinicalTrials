@@ -27,9 +27,9 @@ def index(request):
     home page to list all clinical trials
     """
 
-    for person in User.objects.all():
-        genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
-        genesis.save()
+    # for person in User.objects.all():
+    #     genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
+    #     genesis.save()
 
 
 
