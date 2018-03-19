@@ -26,6 +26,9 @@ def index(request):
     """
     home page to list all clinical trials
     """
+    initAllGenesis()
+    
+    
     all_trials = clinicaltrial.objects.all()
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
