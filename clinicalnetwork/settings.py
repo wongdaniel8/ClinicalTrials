@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', #added for production environment
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -134,8 +135,13 @@ MEDIA_URL = '/media/'
 LOCAL_DEV = False
 # LOCAL_DEV = True
 
-import django_heroku
-django_heroku.settings(locals())
+import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
+
+
+# import django_heroku
+# django_heroku.settings(locals())
 
 
 # PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))

@@ -16,5 +16,5 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "clinicalnetwork.settings")
 application = get_wsgi_application()
 
 # #added for production
-# from whitenoise.django import DjangoWhiteNoise
-# application = DjangoWhiteNoise(application)
+from whitenoise.django import DjangoWhiteNoise
+application = DjangoWhiteNoise(application)

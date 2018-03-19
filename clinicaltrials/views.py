@@ -30,6 +30,7 @@ def index(request):
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
 
+
 def detail(request, clinicaltrial_id):
     """
     specific page of a clinical trial
