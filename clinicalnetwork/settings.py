@@ -23,8 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '1)$pu@4%kh&@8eud9x(b$$s_-e%=w(pfr#znc1z7=wuhf+suz('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-DEBUG = config('DEBUG', default=False, cast=bool) #for production environment 
+# DEBUG = True
+# DEBUG = config('DEBUG', default=False, cast=bool) #for production environment 
 
 ALLOWED_HOSTS = ['cryptic-garden-28398.herokuapp.com', '127.0.0.1']
 
