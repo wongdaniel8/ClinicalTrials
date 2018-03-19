@@ -42,6 +42,10 @@ def detail(request, clinicaltrial_id):
     """
     specific page of a clinical trial
     """
+    #if not signed in, redirect to home page and alert with notification to sign in
+    if request.user.is_anonymous:
+        messages.add_message(request, messages.INFO, 'Please sign in to access data')
+        return redirect("clinicaltrial:index")
     try:
         trial = clinicaltrial.objects.get(pk = clinicaltrial_id)
         # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) #why doesnt this work?
@@ -50,9 +54,10 @@ def detail(request, clinicaltrial_id):
         # adverseEvents = trial.adverseEvents.split("|")
         # adverseEvents = trial.adverseEvent_set.all()
         adverseEvents = adverseEvent.objects.all() #HARD CODED, RETURN SET BELONGING TO TRIAL
+        validityMessage = validate(request.user)[1]
     except:
         raise Http404("trial does not exist")
-    return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles,'blocks': blocks, 'adverseEvents': adverseEvents})
+    return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles,'blocks': blocks, 'adverseEvents': adverseEvents, 'validityMessage':validityMessage})
 
 class UserFormView(View):
     form_class = UserForm
@@ -95,8 +100,8 @@ def userlogin(request):
         if user is not None:
             if user.is_active:
                 login(request, user)                    
-                # return redirect('clinicaltrial:index')
-                return redirect("clinicaltrial:userhome")
+                # return redirect("clinicaltrial:userhome")
+                return redirect("clinicaltrial:index")
 
         return render(request, 'clinicaltrials/login.html') 
 

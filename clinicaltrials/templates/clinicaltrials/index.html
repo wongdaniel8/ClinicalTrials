@@ -12,6 +12,13 @@
 <h1> no trials in data base </h1>
 {% endif %}
 
+{% if messages %}
+    {% for message in messages %}
+    <h4> {{message}} </h4>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <br><br>
 <div id="ucsf-picture"></div>
 

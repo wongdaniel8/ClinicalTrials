@@ -38,11 +38,13 @@
                 </li>
 
 
+                {%if user.is_anonymous is False%} 
                 <li class="active">
                     <a href="{% url 'clinicaltrial:upload' %}">
                     <span class="glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>&nbsp; upload file
                     </a>
                 </li>
+                {% endif %}
 
                 <li class="active">
                     <a href="{% url 'clinicaltrial:register' %}">

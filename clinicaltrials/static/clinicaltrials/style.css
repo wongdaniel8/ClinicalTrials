@@ -80,7 +80,9 @@ body{
 
 	background-size: 100% 100%;
 	/*background: url("ucsf_picture.jpg") no-repeat right bottom;*/
-    height: 800px;
+    /*height: 800px;*/ /*dev mode*/
+    height: 750px; /*production mode*/
+
     max-height: 100%;
     max-width: 100%;
 }
@@ -91,6 +93,10 @@ body{
 	height: 650px;
     max-height: 100%;
     max-width: 100%;
+}
+
+#table {
+	font-size:12px;
 }
 
 
