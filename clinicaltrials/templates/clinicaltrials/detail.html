@@ -7,12 +7,12 @@
 	<h4> Creation date: {{trial.creationDate}}</h4>
 </div>
 
-<!-- {% if messages %}
+{% if messages %}
     {% for message in messages %}
     <h4 id = "errorpass"> {{message}} </h4>
     {% endfor %}
 </ul>
-{% endif %} -->
+{% endif %}
 
 <div class="title"> <h2> Reported Adverse Events</h2> </div>
 <!-- <h3> Reported Adverse Events</h3> -->
@@ -78,7 +78,7 @@
 	            <td>{{block.timeStamp}}</td>
 	            <td>{{block.fileReference.sender}}</td>
 	            <td>{{block.fileReference.owner}}</td>
-	            {% if user == block.fileReference.owner or user.is_superuser %}
+	            {% if user == block.fileReference.owner or user.is_superuser or user.username == "Regulator" or block.fileReference.sender == user  %}
 		            <td> <a href="{% url 'clinicaltrial:download' path=block.fileReference.data.path name=block.fileReference.filename %}"> {{block.fileReference.filename}} </a> 
 		            {% else %}
 		            <td>{{block.fileReference.filename}}
@@ -87,7 +87,7 @@
 	            	
 	            	<form action="{% url 'clinicaltrial:decryptdownload' block.fileReference.data.path  %}" method="post">
 						{% csrf_token %}
-						<input class="decrypt-password" type="text" name="decryptpassword" value="">
+						<input class="decrypt-password" type="password" name="decryptpassword" value="">
 						<br>
 						<input class="decrypt-download-btn" type="submit" value="download decrypted file">
 					</form>

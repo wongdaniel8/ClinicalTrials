@@ -26,13 +26,6 @@ def index(request):
     """
     home page to list all clinical trials
     """
-
-    # for person in User.objects.all():
-    #     genesis = block(owner=person, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
-    #     genesis.save()
-
-
-
     all_trials = clinicaltrial.objects.all()
     context = {'all_trials': all_trials }
     return render(request, 'clinicaltrials/index.html', context)
@@ -81,9 +74,10 @@ class UserFormView(View):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    #initiate the new user's ledger
-                    genesis = block(owner=user, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
-                    genesis.save()
+                    #initiate the new user's ledger with the admins blockchain
+                    replaceWithAdmin(user)
+                    # genesis = block(owner=user, index=1, previousHash="null hash", hashString = hash(str.encode("genesis")))
+                    # genesis.save()
                     return redirect('clinicaltrial:index')
         return render(request, self.template_name, {'form' :form})
 
@@ -324,7 +318,7 @@ def model_form_upload(request):
 
 
     if request.method == 'GET':
-        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
+        form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED 
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
 def updateAdverses(doc, f):
@@ -449,34 +443,35 @@ def crossValidate(user):
         failMessage += conflicts[i][0].username + " at block index: " + str(conflicts[i][1]) + " "
     return False, failMessage           
 
-def replaceWithLongest(user):
+def replaceWithAdmin(user):
     """
     replaces current user's blockchain with the longest one in the network, used when adding new nodes to the network
     """
-    greatestLength = -1
-    longestNode = user
-    for person in User.objects.all():
-        if person != user:
-            if validate(person)[0]:
-                # blockLength = person.block_set.order_by('index').last().index
-                blockLength = person.block_set.all().count()
-                if blockLength > greatestLength:
-                    greatestLength = blockLength
-                    longestNode = person
+    # greatestLength = -1
+    # longestNode = user
+    # for person in User.objects.all():
+    #     if person != user:
+    #         if validate(person)[0]:
+    #             # blockLength = person.block_set.order_by('index').last().index
+    #             blockLength = person.block_set.all().count()
+    #             if blockLength > greatestLength:
+    #                 greatestLength = blockLength
+    #                 longestNode = person
 
+    ref_node = User.objects.get(username="admin")
     #delete user's blockchain
     originalBlocks = user.block_set.all()
     originalBlocks.delete()
 
     #replace with longest valid chain
-    for input_block in longestNode.block_set.order_by('index'):
+    for input_block in ref_node.block_set.order_by('index'):
         newBlock = block(owner=user, index = input_block.index, fileReference=input_block.fileReference, previousHash = input_block.hashString, hashString=input_block.hashString, timeStamp=input_block.timeStamp)
         newBlock.save()
 
 
 def getConsensus():
     """
-    get a universal blockchain that everyone agrees on???
+    get a universal blockchain that everyone agrees on
     """
     return
 
@@ -545,7 +540,6 @@ def CRF(request):
 
 
 
-#
 
 #======================================================================================
 
