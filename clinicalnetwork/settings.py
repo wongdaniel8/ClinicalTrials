@@ -134,7 +134,7 @@ MEDIA_URL = '/media/'
 
 # Configure Django App for Heroku.
 LOCAL_DEV = False
-LOCAL_DEV = True
+# LOCAL_DEV = True
 
 # import django_heroku
 # django_heroku.settings(locals())
