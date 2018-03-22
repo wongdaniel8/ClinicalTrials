@@ -28,7 +28,9 @@ url(r'^user/$', views.userhome, name = 'userhome'),
 url(r'^(?P<clinicaltrial_id>[0-9]+)/$', views.detail, name = "detail"),
 
 #/clinicaltrials/upload = 'upload' pattern
+# url(r'^upload(?P<inputFile>.*)$', views.model_form_upload, name = "upload"),
 url(r'^upload$', views.model_form_upload, name = "upload"),
+
 
 # url(r'^download/(?P<path>.*)$', serve, {'document root': settings.MEDIA_ROOT})
 

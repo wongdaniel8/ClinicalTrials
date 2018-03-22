@@ -1,6 +1,6 @@
 """
 @author Daniel Wong
-logic for most of the application
+logic for most of the clinical trials application
 """
 from django.shortcuts import render, redirect
 from django.http import Http404
@@ -13,6 +13,7 @@ from .forms import UserForm, DocumentForm, LoginForm
 from django.utils.encoding import smart_str
 from django.contrib import messages
 from django.core.files.base import ContentFile
+# from django.core.files import File
 
 import simplecrypt
 import hashlib
@@ -49,7 +50,7 @@ def detail(request, clinicaltrial_id):
         adverseEvents = adverseEvent.objects.all() #HARD CODED, RETURN SET BELONGING TO TRIAL
         validityMessage = validate(request.user)[1]
     except:
-        raise Http404("trial does not exist")
+        raise Http404("error in method def detail render")
     return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles,'blocks': blocks, 'adverseEvents': adverseEvents, 'validityMessage':validityMessage})
 
 class UserFormView(View):
@@ -138,7 +139,7 @@ def downloadMultiple(request):
     filenames = []
     files= getfilenames()
     for names in files:
-        filenames.append( rootDir+names)
+        filenames.append(rootDir + names)
     zip_subdir = "blockchain"
     zip_filename = "%s.zip" % zip_subdir
     # Open StringIO to grab in-memory ZIP contents
@@ -218,9 +219,9 @@ def addToEveryonesLedger(input_block, broadcaster):
 def versionControl(doc, hashString):
     """
     input doc is a form object, hashString is the hash string of the uploaded document 
-    returns desired filename of uploaded file in adherence to version control
+    returns desired filename of uploaded file in adherence to version control,
     method used in conjunction with model_form_upload
-    check for tampering of file if it was already in blockchain (just need one conflict) 
+    check for tampering of file if it was already in blockchain (need >= 1 conflict) 
     if so, return the name of the file of the appropriate version 
     """
     highestVersion = 0
@@ -503,10 +504,8 @@ def CRF(request):
         for item in adverse:
             f.write('\t' + item + '\n')
         f.close()
-        # form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2), 'data': f}) #default to prepopulate targeted clinical trial as second trial HARD CODED CHANGE LATER
-        # request._mutable = True
-        # request.method = 'POST'
-        # return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
+        # f = File(f)
+        # return redirect("clinicaltrial:upload", f) 
         return redirect("clinicaltrial:userhome")
 
 
