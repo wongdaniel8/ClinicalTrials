@@ -5,7 +5,7 @@
 <form action="{% url 'clinicaltrial:login' %}" method="post">
 	{% csrf_token %}
     <label for="username">username: </label>
-    <input  type="text" name="name" value="">
+    <input  type="text" name="name" value="" autocomplete="off">
     <br>
     <label for="input_password">password: </label>
     <input  type="password" name="input_password" value="">
