@@ -37,18 +37,27 @@ def detail(request, clinicaltrial_id):
     specific page of a clinical trial
     """
     #if not signed in, redirect to home page and alert with notification to sign in
-    if request.user.is_anonymous:
-        messages.add_message(request, messages.INFO, 'Please sign in to access data')
-        return redirect("clinicaltrial:index")
+    # if request.user.is_anonymous:
+    #     messages.add_message(request, messages.INFO, 'Please sign in to access data')
+    #     return redirect("clinicaltrial:index")
     try:
-        trial = clinicaltrial.objects.get(pk = clinicaltrial_id)
+        if request.user.is_anonymous: #HARDCODED
+            blocks = User.objects.get(username="admin").block_set.order_by('index')
+        else:
+            blocks = request.user.block_set.order_by('index')
         # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) #why doesnt this work?
+        trial = clinicaltrial.objects.get(pk = clinicaltrial_id)
         allFiles = trial.file_set.all()
-        blocks = request.user.block_set.order_by('index')
+        print("reached 3")
+
         # adverseEvents = trial.adverseEvents.split("|")
         # adverseEvents = trial.adverseEvent_set.all()
         adverseEvents = adverseEvent.objects.all() #HARD CODED, RETURN SET BELONGING TO TRIAL
+        print("reached 4")
+
         validityMessage = validate(request.user)[1]
+        print("reached 1")
+
     except:
         raise Http404("error in method def detail render")
     return render(request, 'clinicaltrials/detail.html', {'trial': trial, 'allFiles': allFiles,'blocks': blocks, 'adverseEvents': adverseEvents, 'validityMessage':validityMessage})
@@ -140,7 +149,7 @@ def downloadMultiple(request):
     files= getfilenames()
     for names in files:
         filenames.append(rootDir + names)
-    zip_subdir = "blockchain"
+    zip_subdir = "summary"
     zip_filename = "%s.zip" % zip_subdir
     # Open StringIO to grab in-memory ZIP contents
     s = io.BytesIO()
@@ -319,6 +328,9 @@ def model_form_upload(request):
 
 
     if request.method == 'GET':
+        if request.user.is_anonymous:
+            messages.add_message(request, messages.INFO, 'Please sign in to upload data')
+            return redirect("clinicaltrial:index")
         form = DocumentForm(initial = {'encrypted': False, 'clinicaltrial': clinicaltrial.objects.get(pk=2)}) #default to prepopulate targeted clinical trial as second trial HARD CODED 
         return render(request, 'clinicaltrials/model_form_upload.html', {'form': form})
 
@@ -396,7 +408,11 @@ def validate(user):
     rerun hash calculations in user's blockchain from beginning with current files in database and compare to user's ledger
     """
     passing = True
-    blocks = user.block_set.order_by('index')
+    if user.is_anonymous: #HARDCODED, for sake of demo, allow unsigned in users to see ledger
+        blocks = User.objects.get(username="admin").block_set.order_by('index')
+    else:
+        blocks = user.block_set.order_by('index')
+
     if blocks.count() <= 1:
         print("Passed, this is a valid blockchain")
         return True, "Passed, this is a valid blockchain"

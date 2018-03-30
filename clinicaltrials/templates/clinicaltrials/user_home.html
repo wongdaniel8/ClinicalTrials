@@ -74,7 +74,7 @@
 	            <td>{{block.timeStamp}}</td>
 	            <td>{{block.fileReference.sender}}</td>
 	            <td>{{block.fileReference.owner}}</td>
-	            {% if user == block.fileReference.owner or user.is_superuser or block.fileReference.sender == user %}
+	            {% if user == block.fileReference.owner or user.is_superuser or user.username == "Regulator" or block.fileReference.sender == user %}
 		            <td> <a href="{% url 'clinicaltrial:download' path=block.fileReference.data.path name=block.fileReference.filename %}"> {{block.fileReference.filename}} </a> 
 		            {% else %}
 		            <td>{{block.fileReference.filename}}
