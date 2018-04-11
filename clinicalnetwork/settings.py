@@ -26,7 +26,7 @@ SECRET_KEY = '1)$pu@4%kh&@8eud9x(b$$s_-e%=w(pfr#znc1z7=wuhf+suz('
 DEBUG = True
 # DEBUG = config('DEBUG', default=False, cast=bool) #for production environment 
 
-ALLOWED_HOSTS = ['cryptic-garden-28398.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['cryptic-garden-28398.herokuapp.com', 'sleepy-inlet-57543.herokuapp.com', '127.0.0.1'] #sleepy inlet for Butte lab account through Boris
 
 
 # Application definition
