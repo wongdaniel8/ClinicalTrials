@@ -14,7 +14,6 @@
 </ul>
 {% endif %}
 
-<div class="title"> <h2> Reported Adverse Events</h2> </div>
 <!-- <h3> Reported Adverse Events</h3> -->
 <!-- <h5> {{adverseEvents}} </h5> -->
 
@@ -24,6 +23,8 @@
 {% endfor %}
 <br> <br> -->
 
+{% if user.username == "Regulator" or user.username == "DSMB" or user.username == "admin" %}
+<div class="title"> <h2> Reported Adverse Events</h2> </div>
 <table id="adverse-table" class="table table-hover">
     <thead class="blue-grey lighten-4">
     	 <tr>
@@ -40,6 +41,7 @@
     	{% endfor %}
     </tbody>
 </table>
+{% endif %}
 
 
 
