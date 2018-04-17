@@ -25,7 +25,7 @@ class adverseEvent(models.Model):
 #to serve as a transaction
 class file(models.Model):
 	clinicaltrial = models.ForeignKey(clinicaltrial, on_delete = models.CASCADE, blank=True, null=True)
-	owner = models.ForeignKey(User, related_name="owner", on_delete = models.CASCADE, blank=True, null=True, unique = False)
+	owner = models.ForeignKey(User, related_name="owner", on_delete = models.CASCADE, blank=True, null=True, unique = False, verbose_name="receiver")
 	sender = models.ForeignKey(User, related_name="sender", on_delete = models.CASCADE, blank=True, null=True, unique = False)
 	filename = models.CharField(max_length = 100)
 	encrypted = models.BooleanField(default=False, blank=True)

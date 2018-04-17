@@ -48,15 +48,10 @@ def detail(request, clinicaltrial_id):
         # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) #why doesnt this work?
         trial = clinicaltrial.objects.get(pk = clinicaltrial_id)
         allFiles = trial.file_set.all()
-        print("reached 3")
-
         # adverseEvents = trial.adverseEvents.split("|")
         # adverseEvents = trial.adverseEvent_set.all()
         adverseEvents = adverseEvent.objects.all() #HARD CODED, RETURN SET BELONGING TO TRIAL
-        print("reached 4")
-
         validityMessage = validate(request.user)[1]
-        print("reached 1")
 
     except:
         raise Http404("error in method def detail render")
