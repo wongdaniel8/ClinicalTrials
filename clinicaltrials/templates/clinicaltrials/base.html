@@ -53,11 +53,14 @@
                     </a>
                 </li>
 
-                 <li class="active">
+                {%if user.is_anonymous is False%} 
+                <li class="active">
                     <a href="{% url 'clinicaltrial:logout' %}">
                     <span class="glyphicon glyphicon-off" aria-hidden="true"></span>&nbsp; logout
                     </a>
                 </li>
+                {% endif %}
+                
 
                 <!-- only show login if not logged in  -->
                 {%if user.is_anonymous %} 
