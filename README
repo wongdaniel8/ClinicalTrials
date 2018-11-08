@@ -5,6 +5,9 @@ The blockchain in this simulation exists as multiple copies in one physical loca
 
 The portal can be found at: http://trialchain.ucsf.edu/.
 
+All data elements from the portal are either extracted from the clinical data repository ImmPort: http://www.immport.org/immport-open/public/study/study/displayStudyDetail/SDY1
+or simulated due to our lack of access to more safeguarded data. 
+
 All rights are reserved, and cloning or use of any part of the source code must first be permissioned by the author: 
 Daniel Wong
 daniel.wong2@ucsf.edu
