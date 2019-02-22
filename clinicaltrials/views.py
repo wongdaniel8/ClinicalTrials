@@ -45,7 +45,7 @@ def detail(request, clinicaltrial_id):
             blocks = User.objects.get(username="admin").block_set.order_by('index')
         else:
             blocks = request.user.block_set.order_by('index')
-        # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) #why doesnt this work?
+        # allFiles = file.objects.all(clinicaltrial = clinicaltrial_id) 
         trial = clinicaltrial.objects.get(pk = clinicaltrial_id)
         allFiles = trial.file_set.all()
         # adverseEvents = trial.adverseEvents.split("|")
@@ -381,7 +381,7 @@ def extractAdverseEvents(file):
         if beginParse:
             # line=line.rstrip('\t')
             line=line.rstrip('\n')
-            line = line[1:] #hackish to remove tabs, rstrip wasn't working...
+            line = line[1:] #hackish to remove tabs, rstrip not functioning well
             adverseEvents.append(line)
     return adverseEvents
 
@@ -481,11 +481,11 @@ def replaceWithAdmin(user):
         newBlock.save()
 
 
-def getConsensus():
-    """
-    get a universal blockchain that everyone agrees on
-    """
-    return
+# def getConsensus():
+#     """
+#     get a universal blockchain that everyone agrees on
+#     """
+#     return
 
 def CRF(request):
     """
@@ -526,7 +526,7 @@ def CRF(request):
     #only 1 physical version of uploaded document exists, each node ledger is a copy of central FDA's, all stored on one database
     #validation: check if file upload conflicts with central ledger owned by FDA, encrypted and backed up with each new upload
     #pros: easier to write and manage, more power and control to FDA
-    #cons: security vulnerability with only one copy, but if backed up its ok
+    #cons: security vulnerability with only one copy, but ok if backed up
 
 #decentralized (democracy) distributed database:
     #copy/duplicate uploaded file for each user's blockchain ledger
@@ -552,7 +552,7 @@ def CRF(request):
 
 
 #======================================================================================
-
+#OLD CODE
 
 
 # def model_form_upload(request):
